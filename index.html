@@ -56,12 +56,13 @@
             <div class="container">
                 <h2>Nuestros Servicios</h2>
                 <div class="category-selector">
-                    <label class="switch">
-                        <input type="checkbox" id="categoryToggle">
-                        <span class="slider round">
-                            <span class="slider-text" data-on="En pareja" data-off="Individual"></span>
-                        </span>
-                    </label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="categoryToggle" class="toggle-input">
+                        <label for="categoryToggle" class="toggle-label">
+                            <span class="toggle-inner"></span>
+                            <span class="toggle-switch"></span>
+                        </label>
+                    </div>
                 </div>
                 <div id="services-list" class="services-grid"></div>
             </div>
@@ -98,6 +99,7 @@
                             <h3 class="image-title">Ambiente Acogedor</h3>
                             <p class="image-description">Disfruta de nuestro espacio de relajación único.</p>
                         </div>
+                        <div class="more-icon">+</div>
                     </div>
                     <div class="gallery-item">
                         <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/QUESOSAHM.jpg" alt="Sillas choco vino esquinado H">
@@ -105,6 +107,7 @@
                             <h3 class="image-title">Delicias Gourmet</h3>
                             <p class="image-description">Saborea nuestra selección de quesos y vinos premium.</p>
                         </div>
+                        <div class="more-icon">+</div>
                     </div>
                     <div class="gallery-item">
                         <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/par.JPG" alt="Sillas choco vino esquinado H">
@@ -112,6 +115,7 @@
                             <h3 class="image-title">Masaje en Pareja</h3>
                             <p class="image-description">Comparte un momento de relajación con tu ser querido.</p>
                         </div>
+                        <div class="more-icon">+</div>
                     </div>
                     <div class="gallery-item">
                         <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/rosal.JPG" alt="Rosal">
@@ -119,8 +123,8 @@
                             <h3 class="image-title">Toque Romántico</h3>
                             <p class="image-description">Detalles que hacen la diferencia en tu experiencia.</p>
                         </div>
+                        <div class="more-icon">+</div>
                     </div>
-                    <!-- Repeat for other gallery items -->
                 </div>
             </div>
         </section>
@@ -203,13 +207,12 @@
                 </div>
                 <div class="service-buttons">
                     <button class="reserve-button">Reserva ahora</button>
-                    <button class="info-button">Saber más</button>
                 </div>
             </div>
             <div class="more-icon">+</div>
         </div>
     </template>
-    
+
     <template id="package-template">
         <div class="package-item">
             <div class="package-background"></div>
@@ -229,7 +232,6 @@
                 </div>
                 <div class="package-buttons">
                     <button class="reserve-button">Reservar</button>
-                    <button class="info-button">Saber más</button>
                 </div>
             </div>
             <div class="more-icon">+</div>
