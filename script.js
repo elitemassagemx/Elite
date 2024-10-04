@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function sendWhatsAppMessage(action, serviceTitle) {
         console.log(`Sending WhatsApp message for: ${action} - ${serviceTitle}`);
         const message = encodeURIComponent(`Hola! Quiero ${action} un ${serviceTitle}`);
-const url = `https://wa.me/5215640020305?text=${message}`;
+        const url = `https://wa.me/5215640020305?text=${message}`;
         window.open(url, '_blank');
     }
 
