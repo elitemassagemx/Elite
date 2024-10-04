@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleImageError(img) {
         console.warn(`Failed to load image: ${img.src}`);
         img.style.display = 'none';
-        // Opcional: Mostrar una imagen de reemplazo
-        // img.src = 'path/to/fallback-image.png';
     }
 
     function buildImageUrl(iconPath) {
@@ -82,8 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const reserveButton = serviceElement.querySelector('.reserve-button');
             reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', service.title));
 
-            const infoButton = serviceElement.querySelector('.info-button');
-            infoButton.addEventListener('click', () => showPopup(service));
+            const moreIcon = serviceElement.querySelector('.more-icon');
+            moreIcon.addEventListener('click', () => showPopup(service));
+
+            const serviceBackground = serviceElement.querySelector('.service-background');
+            serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
 
             servicesList.appendChild(serviceElement);
         });
@@ -93,24 +94,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPackages() {
         console.log('Rendering packages');
         const packageList = getElement('package-list');
-        if (!packageList) return;
+        const template = getElement('package-template');
+        if (!packageList || !template) return;
 
         packageList.innerHTML = '';
         services.paquetes.forEach(pkg => {
-            const packageElement = document.createElement('div');
-            packageElement.className = 'package-item';
-            packageElement.innerHTML = `
-                <h3>${pkg.title}</h3>
-                <p>${pkg.description}</p>
-                <p><strong>Incluye:</strong> ${pkg.includes.join(', ')}</p>
-                <p><strong>Duración:</strong> ${pkg.duration}</p>
-                <p><strong>Beneficios:</strong> ${pkg.benefits.join(', ')}</p>
-                <button class="reserve-button">Reservar</button>
-                <button class="info-button">Saber más</button>
-            `;
+            const packageElement = template.content.cloneNode(true);
+            
+            packageElement.querySelector('.package-title').textContent = pkg.title;
+            packageElement.querySelector('.package-description').textContent = pkg.description;
+            packageElement.querySelector('.package-includes-list').textContent = pkg.includes.join(', ');
+            packageElement.querySelector('.package-duration-text').textContent = pkg.duration;
+            packageElement.querySelector('.package-benefits-list').textContent = pkg.benefits.join(', ');
 
-            packageElement.querySelector('.reserve-button').addEventListener('click', () => sendWhatsAppMessage('Reservar', pkg.title));
-            packageElement.querySelector('.info-button').addEventListener('click', () => showPopup(pkg));
+            const reserveButton = packageElement.querySelector('.reserve-button');
+            reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', pkg.title));
+
+            const moreIcon = packageElement.querySelector('.more-icon');
+            moreIcon.addEventListener('click', () => showPopup(pkg));
+
+            const packageBackground = packageElement.querySelector('.package-background');
+            packageBackground.style.backgroundImage = `url(${buildImageUrl(pkg.backgroundImage)})`;
 
             packageList.appendChild(packageElement);
         });
@@ -123,13 +127,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const popupTitle = getElement('popup-title');
         const popupImage = getElement('popup-image');
         const popupDescription = getElement('popup-description');
-        if (!popup || !popupTitle || !popupImage || !popupDescription) return;
+        const popupBenefits = getElement('popup-benefits');
+        const popupDuration = getElement('popup-duration');
+        if (!popup || !popupTitle || !popupImage || !popupDescription || !popupBenefits || !popupDuration) return;
 
         popupTitle.textContent = data.title || '';
         popupImage.src = buildImageUrl(data.popupImage || data.image);
         popupImage.alt = data.title || '';
         popupImage.onerror = () => handleImageError(popupImage);
         popupDescription.textContent = data.popupDescription || data.description || '';
+        popupBenefits.textContent = Array.isArray(data.benefits) ? data.benefits.join(', ') : data.benefits || '';
+        popupDuration.textContent = data.duration || '';
 
         popup.style.display = 'block';
     }
@@ -137,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function sendWhatsAppMessage(action, serviceTitle) {
         console.log(`Sending WhatsApp message for: ${action} - ${serviceTitle}`);
         const message = encodeURIComponent(`Hola! Quiero ${action} un ${serviceTitle}`);
-        const url = `https://wa.me/5215640020305?text=${message}`;
+const url = `https://wa.me/5215640020305?text=${message}`;
         window.open(url, '_blank');
     }
 
@@ -179,13 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupCategorySelector() {
-        document.querySelectorAll('.choice-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                console.log(`Choice chip clicked: ${chip.dataset.category}`);
-                document.querySelectorAll('.choice-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                renderServices(chip.dataset.category);
-            });
+        const categoryToggle = getElement('categoryToggle');
+        if (!categoryToggle) return;
+
+        categoryToggle.addEventListener('change', (event) => {
+            const category = event.target.checked ? 'pareja' : 'individual';
+            console.log(`Category changed to: ${category}`);
+            renderServices(category);
         });
     }
 
@@ -268,9 +276,29 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Found ${images.length} images in the gallery`);
     }
 
-    function cleanupEventListeners() {
-        // Implementa la limpieza de event listeners aquí si es necesario
-        console.log('Cleaning up event listeners');
+    function setupGalleryModal() {
+        const modal = getElement('imageModal');
+        const modalImg = getElement('modalImage');
+        const modalDescription = getElement('modalDescription');
+        const closeBtn = modal.querySelector('.close');
+
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', function() {
+                modal.style.display = "block";
+                modalImg.src = this.querySelector('img').src;
+                modalDescription.innerHTML = this.querySelector('.image-description').innerHTML;
+            });
+        });
+
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
     }
 
     function init() {
@@ -279,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupCategorySelector();
         setupPopup();
         setupGalleryAnimations();
-        window.addEventListener('beforeunload', cleanupEventListeners);
+        setupGalleryModal();
     }
 
     init();
