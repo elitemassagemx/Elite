@@ -56,8 +56,12 @@
             <div class="container">
                 <h2>Nuestros Servicios</h2>
                 <div class="category-selector">
-                    <button class="choice-chip active" data-category="individual">Individual</button>
-                    <button class="choice-chip" data-category="pareja">En Pareja</button>
+                    <label class="switch">
+                        <input type="checkbox" id="categoryToggle">
+                        <span class="slider round">
+                            <span class="slider-text" data-on="En pareja" data-off="Individual"></span>
+                        </span>
+                    </label>
                 </div>
                 <div id="services-list" class="services-grid"></div>
             </div>
@@ -154,9 +158,23 @@
     <div id="popup" class="popup">
         <div class="popup-content">
             <span class="close">&times;</span>
+            <img id="popup-image" src="" alt="Imagen del servicio">
             <h2 id="popup-title"></h2>
-            <img id="popup-image" src="" alt="Imagen del servicio" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-service-image.png';">
             <p id="popup-description"></p>
+            <div class="popup-details">
+                <div class="popup-benefits">
+                    <img src="/ICONOS/benefits-icon.png" alt="Beneficios" class="benefits-icon">
+                    <span id="popup-benefits"></span>
+                </div>
+                <div class="popup-duration">
+                    <img src="/ICONOS/duration-icon.png" alt="Duración" class="duration-icon">
+                    <span id="popup-duration"></span>
+                </div>
+            </div>
+            <a href="#" id="whatsapp-button" class="whatsapp-button">
+                <img src="/ICONOS/whatsapp-icon.png" alt="WhatsApp">
+                Reservar por WhatsApp
+            </a>
         </div>
     </div>
 
@@ -168,25 +186,53 @@
 
     <template id="service-template">
         <div class="service-item">
-            <div class="service-header">
-                <img class="service-icon" alt="Icono del servicio" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-icon.png';">
-                <h3 class="service-title"></h3>
+            <div class="service-background"></div>
+            <div class="service-content">
+                <div class="service-header">
+                    <img class="service-icon" alt="Icono del servicio">
+                    <h3 class="service-title"></h3>
+                </div>
+                <p class="service-description"></p>
+                <div class="benefits-container">
+                    <img src="/ICONOS/benefits-icon.png" alt="Beneficios" class="benefits-icon">
+                    <span class="service-benefits"></span>
+                </div>
+                <div class="duration-container">
+                    <img src="/ICONOS/duration-icon.png" alt="Duración" class="duration-icon">
+                    <span class="service-duration"></span>
+                </div>
+                <div class="service-buttons">
+                    <button class="reserve-button">Reserva ahora</button>
+                    <button class="info-button">Saber más</button>
+                </div>
             </div>
-            <p class="service-description"></p>
-            <div class="benefits-container">
-                <span>Beneficios:</span>
-                <img src="path-to-benefits-icon.png" alt="Beneficios" class="benefits-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-icon.png';">
-                <span class="service-benefits"></span>
+            <div class="more-icon">+</div>
+        </div>
+    </template>
+    
+    <template id="package-template">
+        <div class="package-item">
+            <div class="package-background"></div>
+            <div class="package-content">
+                <h3 class="package-title"></h3>
+                <p class="package-description"></p>
+                <div class="package-includes">
+                    <strong>Incluye:</strong> <span class="package-includes-list"></span>
+                </div>
+                <div class="package-duration">
+                    <img src="/ICONOS/duration-icon.png" alt="Duración" class="duration-icon">
+                    <span class="package-duration-text"></span>
+                </div>
+                <div class="package-benefits">
+                    <img src="/ICONOS/benefits-icon.png" alt="Beneficios" class="benefits-icon">
+                    <span class="package-benefits-list"></span>
+                </div>
+                <div class="package-buttons">
+                    <button class="reserve-button">Reservar</button>
+                    <button class="info-button">Saber más</button>
+                </div>
             </div>
-            <div class="duration-container">
-                <span>Duración:</span>
-                <img src="path-to-duration-icon.png" alt="Duración" class="duration-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-icon.png';">
-                <span class="service-duration"></span>
-            </div>
-            <div class="service-buttons">
-                <button class="reserve-button">Reserva ahora</button>
-<button class="info-button">Saber más</button>
-            </div>
+            <div class="more-icon">+</div>
         </div>
     </template>
     
@@ -207,67 +253,5 @@
     
     <!-- Tu script personalizado -->
     <script src="script.js"></script>
-
-    <!-- Script para la animación de la galería -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            gsap.registerPlugin(ScrollTrigger);
-
-            const gallery = document.querySelector('.gallery-container');
-
-            if (gallery) {
-                ScrollTrigger.create({
-                    trigger: gallery,
-                    start: "top 80%",
-                    onEnter: () => gallery.classList.add('is-visible'),
-                    onLeaveBack: () => gallery.classList.remove('is-visible')
-                });
-
-                gsap.utils.toArray('.gallery-container img').forEach(img => {
-                    gsap.from(img, {
-                        scale: 0.8,
-                        opacity: 0,
-                        duration: 0.5,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: img,
-                            start: "top 80%",
-                            toggleActions: "play none none reverse"
-                        }
-                    });
-                });
-            } else {
-                console.error('Gallery container not found');
-            }
-        });
-    </script>
-
-    <!-- Script para el modal de la galería -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var modal = document.getElementById('imageModal');
-            var modalImg = document.getElementById('modalImage');
-            var modalDesc = document.getElementById('modalDescription');
-            var span = document.getElementsByClassName('close')[0];
-
-            document.querySelectorAll('.gallery-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    modal.style.display = "block";
-                    modalImg.src = this.querySelector('img').src;
-                    modalDesc.innerHTML = this.querySelector('.image-description').innerHTML;
-                });
-            });
-
-            span.onclick = function() {
-                modal.style.display = "none";
-            }
-
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            }
-        });
-    </script>
 </body>
 </html>
