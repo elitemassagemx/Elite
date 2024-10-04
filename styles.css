@@ -150,20 +150,20 @@ h1 {
     margin-bottom: 2rem;
 }
 
-.switch {
+.toggle-switch {
     position: relative;
     display: inline-block;
     width: 200px;
     height: 34px;
 }
 
-.switch input {
+.toggle-input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.slider {
+.toggle-label {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -175,7 +175,7 @@ h1 {
     border-radius: 34px;
 }
 
-.slider:before {
+.toggle-label:before {
     position: absolute;
     content: "";
     height: 26px;
@@ -187,35 +187,45 @@ h1 {
     border-radius: 50%;
 }
 
-input:checked + .slider {
-    background-color: var(--primary-color);
+.toggle-input:checked + .toggle-label {
+    background-color: #2196F3;
 }
 
-input:checked + .slider:before {
+.toggle-input:checked + .toggle-label:before {
     transform: translateX(166px);
 }
 
-.slider-text {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    width: 100%;
+.toggle-inner {
+    display: block;
+    width: 200%;
+    margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+
+.toggle-inner:before, .toggle-inner:after {
+    float: left;
+    width: 50%;
+    height: 34px;
+    padding: 0;
+    line-height: 34px;
     color: white;
     font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    box-sizing: border-box;
 }
 
-.slider-text:before {
-    content: attr(data-off);
-    position: absolute;
-    left: 10px;
+.toggle-inner:before {
+    content: "Individual";
+    padding-left: 10px;
+    background-color: #ccc;
+    color: #fff;
 }
 
-.slider-text:after {
-    content: attr(data-on);
-    position: absolute;
-    right: 10px;
+.toggle-inner:after {
+    content: "En pareja";
+    padding-right: 10px;
+    background-color: #2196F3;
+    color: #fff;
+    text-align: right;
 }
 
 /* Grids de servicios y paquetes */
@@ -312,7 +322,7 @@ input:checked + .slider:before {
     margin-top: auto;
 }
 
-.service-buttons button, .package-item button {
+.reserve-button {
     background-color: var(--primary-color);
     color: var(--background-color);
     border: none;
@@ -326,7 +336,7 @@ input:checked + .slider:before {
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.service-buttons button:hover, .package-item button:hover {
+.reserve-button:hover {
     background-color: var(--gold);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -415,6 +425,24 @@ input:checked + .slider:before {
     font-size: 0.9rem;
 }
 
+.gallery-item .more-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 2;
+}
+
 /* Estilos para el popup */
 .popup {
     display: none;
@@ -441,7 +469,7 @@ input:checked + .slider:before {
 }
 
 .popup-content h2 {
-    margin-bottom: 1rem;
+    margin: 1rem 0;
     color: var(--text-color);
 }
 
