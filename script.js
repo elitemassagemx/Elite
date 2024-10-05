@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return element;
     }
 
-    // Cargar los datos del JSON
     function loadJSONData() {
         fetch('data.json')
             .then(response => {
@@ -36,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 services = data.services;
                 renderServices('individual');
                 renderPackages();
+                setupFilters(); // Añadido para configurar los filtros después de cargar los datos
             })
             .catch(error => {
                 console.error('Error loading the JSON file:', error);
@@ -86,6 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const serviceBackground = serviceElement.querySelector('.service-background');
             serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
 
+            // Añadir clases de filtro basadas en los beneficios
+            const serviceItem = serviceElement.querySelector('.service-item');
+            service.benefits.forEach(benefit => {
+                serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
+            });
+
             servicesList.appendChild(serviceElement);
         });
         console.log(`Rendered ${services[category].length} services`);
@@ -115,6 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const packageBackground = packageElement.querySelector('.package-background');
             packageBackground.style.backgroundImage = `url(${buildImageUrl(pkg.backgroundImage)})`;
+
+            // Añadir clase de filtro basada en el tipo de paquete
+            const packageItem = packageElement.querySelector('.package-item');
+            packageItem.classList.add(pkg.type.toLowerCase().replace(/\s+/g, '-'));
 
             packageList.appendChild(packageElement);
         });
@@ -154,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var selectField = document.querySelector('.goog-te-combo');
         if (selectField) {
             selectField.value = lang;
-selectField.dispatchEvent(new Event('change'));
+            selectField.dispatchEvent(new Event('change'));
         } else {
             console.error('Google Translate dropdown not found');
         }
@@ -299,6 +309,35 @@ selectField.dispatchEvent(new Event('change'));
                 modal.style.display = "none";
             }
         }
+    }
+
+    function setupFilters() {
+        setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
+        setupFilterButtons('.package-nav', '#package-list', '.package-item');
+    }
+
+    function setupFilterButtons(navSelector, listSelector, itemSelector) {
+        const filterButtons = document.querySelectorAll(`${navSelector} button`);
+        const items = document.querySelectorAll(itemSelector);
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.getAttribute('data-filter');
+                
+                // Actualizar botones activos
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Filtrar elementos
+                items.forEach(item => {
+                    if (filter === 'all' || item.classList.contains(filter)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
     }
 
     function init() {
