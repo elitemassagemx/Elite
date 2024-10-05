@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function buildImageUrl(iconPath) {
         if (!iconPath) return '';
-        return iconPath.replace('${BASE_URL}', BASE_URL);
+        return iconPath.startsWith('http') ? iconPath : `${BASE_URL}${iconPath}`;
     }
 
     function getElement(id) {
@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
-                console.log('JSON data loaded successfully');
+                console.log('JSON data loaded successfully:', data);
                 services = data.services;
                 renderServices('individual');
                 renderPackages();
-                setupFilters(); // Añadido para configurar los filtros después de cargar los datos
+                setupFilters();
             })
             .catch(error => {
                 console.error('Error loading the JSON file:', error);
@@ -54,28 +54,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         servicesList.innerHTML = '';
 
-        services[category].forEach(service => {
+        if (!Array.isArray(services[category])) {
+            console.error(`services[${category}] is not an array:`, services[category]);
+            servicesList.innerHTML = '<p>Error al cargar los servicios. Por favor, intente más tarde.</p>';
+            return;
+        }
+
+        services[category].forEach((service, index) => {
+            console.log(`Rendering service ${index + 1}:`, service);
             const serviceElement = template.content.cloneNode(true);
             
-            serviceElement.querySelector('.service-title').textContent = service.title;
+            serviceElement.querySelector('.service-title').textContent = service.title || 'Sin título';
             
             const serviceIcon = serviceElement.querySelector('.service-icon');
             serviceIcon.src = buildImageUrl(service.icon);
             serviceIcon.onerror = () => handleImageError(serviceIcon);
             
-            serviceElement.querySelector('.service-description').textContent = service.description;
+            serviceElement.querySelector('.service-description').textContent = service.description || 'Sin descripción';
             
             const benefitsIcon = serviceElement.querySelector('.benefits-icon');
             benefitsIcon.src = buildImageUrl(Array.isArray(service.benefitsIcons) ? service.benefitsIcons[0] : service.benefitsIcons);
             benefitsIcon.onerror = () => handleImageError(benefitsIcon);
             
-            serviceElement.querySelector('.service-benefits').textContent = service.benefits.join(', ');
+            serviceElement.querySelector('.service-benefits').textContent = Array.isArray(service.benefits) ? service.benefits.join(', ') : 'No especificado';
             
             const durationIcon = serviceElement.querySelector('.duration-icon');
             durationIcon.src = buildImageUrl(service.durationIcon);
             durationIcon.onerror = () => handleImageError(durationIcon);
             
-            serviceElement.querySelector('.service-duration').textContent = service.duration;
+            serviceElement.querySelector('.service-duration').textContent = service.duration || 'Duración no especificada';
 
             const reserveButton = serviceElement.querySelector('.reserve-button');
             reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', service.title));
@@ -84,13 +91,17 @@ document.addEventListener('DOMContentLoaded', () => {
             moreIcon.addEventListener('click', () => showPopup(service));
 
             const serviceBackground = serviceElement.querySelector('.service-background');
-            serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
+            if (service.backgroundImage) {
+                serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
+            }
 
             // Añadir clases de filtro basadas en los beneficios
             const serviceItem = serviceElement.querySelector('.service-item');
-            service.benefits.forEach(benefit => {
-                serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
-            });
+            if (Array.isArray(service.benefits)) {
+                service.benefits.forEach(benefit => {
+                    serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
+                });
+            }
 
             servicesList.appendChild(serviceElement);
         });
@@ -101,17 +112,27 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Rendering packages');
         const packageList = getElement('package-list');
         const template = getElement('package-template');
-        if (!packageList || !template) return;
+        if (!packageList || !template) {
+            console.error('Package list or template not found');
+            return;
+        }
 
         packageList.innerHTML = '';
-        services.paquetes.forEach(pkg => {
+        if (!Array.isArray(services.paquetes)) {
+            console.error('services.paquetes is not an array:', services.paquetes);
+            packageList.innerHTML = '<p>Error al cargar los paquetes. Por favor, intente más tarde.</p>';
+            return;
+        }
+
+        services.paquetes.forEach((pkg, index) => {
+            console.log(`Rendering package ${index + 1}:`, pkg);
             const packageElement = template.content.cloneNode(true);
             
-            packageElement.querySelector('.package-title').textContent = pkg.title;
-            packageElement.querySelector('.package-description').textContent = pkg.description;
-            packageElement.querySelector('.package-includes-list').textContent = pkg.includes.join(', ');
-            packageElement.querySelector('.package-duration-text').textContent = pkg.duration;
-            packageElement.querySelector('.package-benefits-list').textContent = pkg.benefits.join(', ');
+            packageElement.querySelector('.package-title').textContent = pkg.title || 'Sin título';
+            packageElement.querySelector('.package-description').textContent = pkg.description || 'Sin descripción';
+            packageElement.querySelector('.package-includes-list').textContent = Array.isArray(pkg.includes) ? pkg.includes.join(', ') : 'No especificado';
+            packageElement.querySelector('.package-duration-text').textContent = pkg.duration || 'Duración no especificada';
+            packageElement.querySelector('.package-benefits-list').textContent = Array.isArray(pkg.benefits) ? pkg.benefits.join(', ') : 'No especificado';
 
             const reserveButton = packageElement.querySelector('.reserve-button');
             reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', pkg.title));
@@ -120,11 +141,15 @@ document.addEventListener('DOMContentLoaded', () => {
             moreIcon.addEventListener('click', () => showPopup(pkg));
 
             const packageBackground = packageElement.querySelector('.package-background');
-            packageBackground.style.backgroundImage = `url(${buildImageUrl(pkg.backgroundImage)})`;
+            if (pkg.backgroundImage) {
+                packageBackground.style.backgroundImage = `url(${buildImageUrl(pkg.backgroundImage)})`;
+            }
 
             // Añadir clase de filtro basada en el tipo de paquete
             const packageItem = packageElement.querySelector('.package-item');
-            packageItem.classList.add(pkg.type.toLowerCase().replace(/\s+/g, '-'));
+            if (pkg.type) {
+                packageItem.classList.add(pkg.type.toLowerCase().replace(/\s+/g, '-'));
+            }
 
             packageList.appendChild(packageElement);
         });
