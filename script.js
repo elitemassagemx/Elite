@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var selectField = document.querySelector('.goog-te-combo');
         if (selectField) {
             selectField.value = lang;
-            selectField.dispatchEvent(new Event('change'));
+selectField.dispatchEvent(new Event('change'));
         } else {
             console.error('Google Translate dropdown not found');
         }
