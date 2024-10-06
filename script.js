@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 console.log('JSON data loaded successfully:', data);
                 services = data.services;
-                renderServices('individual');
+                renderServices('masajes');
                 renderPackages();
                 setupFilters();
                 setupServiceCategories();
@@ -190,9 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var selectField = document.querySelector('.goog-te-combo');
         if (selectField) {
             selectField.value = lang;
-            selectField.disp
-            
-atchEvent(new Event('change'));
+            selectField.dispatchEvent(new Event('change'));
         } else {
             console.error('Google Translate dropdown not found');
         }
@@ -225,12 +223,10 @@ atchEvent(new Event('change'));
     }
 
     function setupServiceCategories() {
-        const categoryButtons = document.querySelectorAll('.category-btn');
+        const categoryButtons = document.querySelectorAll('input[name="service-category"]');
         categoryButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const category = button.dataset.category;
-                categoryButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
+            button.addEventListener('change', () => {
+                const category = button.value;
                 renderServices(category);
                 setupBenefitsNav(category);
             });
