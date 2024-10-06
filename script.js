@@ -11,7 +11,9 @@ $(document).ready(function() {
 
     function buildImageUrl(iconPath) {
         if (!iconPath) return '';
-        return iconPath.startsWith('http') ? iconPath : `${BASE_URL}${iconPath}`;
+        const url = iconPath.startsWith('http') ? iconPath : `${BASE_URL}${iconPath}`;
+        console.log('Built image URL:', url);
+        return url;
     }
 
     function getElement(id) {
@@ -23,17 +25,35 @@ $(document).ready(function() {
     }
 
     function loadJSONData() {
-        $.getJSON('data.json')
-            .done(function(data) {
-                console.log('JSON data loaded successfully:', data);
-                services = data.services;
-                renderServices('masajes');
-                renderPackages();
-                setupFilters();
-                setupServiceCategories();
+        const jsonFiles = ['data.json', 'exper.json', 'prem.json'];
+        const promises = jsonFiles.map(file => 
+            $.getJSON(file).catch(error => {
+                console.error(`Error loading ${file}:`, error);
+                return null;
             })
-            .fail(function(jqxhr, textStatus, error) {
-                console.error('Error loading the JSON file:', error);
+        );
+
+        Promise.all(promises)
+            .then(results => {
+                const [data, exper, prem] = results;
+                if (data && data.services) {
+                    services = {
+                        ...data.services,
+                        ...(exper || {}),
+                        ...(prem || {})
+                    };
+                    console.log('All JSON data loaded successfully:', services);
+                    renderServices('individual');
+                    renderServices('pareja');
+                    renderPackages();
+                    setupFilters();
+                    setupServiceCategories();
+                } else {
+                    console.error('Invalid data structure in JSON files');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading JSON files:', error);
                 const servicesList = getElement('services-list');
                 const packageList = getElement('package-list');
                 if (servicesList) servicesList.innerHTML = '<p>Error al cargar los servicios. Por favor, intente más tarde.</p>';
@@ -43,7 +63,7 @@ $(document).ready(function() {
 
     function renderServices(category) {
         console.log(`Rendering services for category: ${category}`);
-        const servicesList = getElement('services-list');
+        const servicesList = getElement(category === 'individual' ? 'services-list' : 'couple-services-list');
         const template = getElement('service-template');
         if (!servicesList || !template) return;
 
@@ -100,7 +120,7 @@ $(document).ready(function() {
 
             servicesList.appendChild(serviceElement);
         });
-        console.log(`Rendered ${services[category].length} services`);
+        console.log(`Rendered ${services[category].length} services for ${category}`);
     }
 
     function renderPackages() {
@@ -157,8 +177,7 @@ $(document).ready(function() {
         const popupTitle = getElement('popup-title');
         const popupImage = getElement('popup-image');
         const popupDescription = getElement('popup-description');
-        const popupBenefits = get
-        Element('popup-benefits');
+        const popupBenefits = getElement('popup-benefits');
         const popupDuration = getElement('popup-duration');
         if (!popup || !popupTitle || !popupImage || !popupDescription || !popupBenefits || !popupDuration) return;
 
@@ -220,7 +239,11 @@ $(document).ready(function() {
     function setupServiceCategories() {
         $('input[name="service-category"]').on('change', function() {
             const category = $(this).val();
-            renderServices(category);
+            if (category === 'individual' || category === 'pareja') {
+                renderServices(category);
+            } else if (category === 'paquetes') {
+                renderPackages();
+            }
             setupBenefitsNav(category);
         });
     }
@@ -349,7 +372,8 @@ $(document).ready(function() {
         $('.gallery-item').on('click', function() {
             modal.css('display', 'block');
             modalImg.attr('src', $(this).find('img').attr('src'));
-            modalDescription.html($(this).find('.image-description').html());
+            modalDescription.html($(this).find('.
+                                               image-description').html());
         });
 
         closeBtn.on('click', function() {
