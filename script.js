@@ -372,11 +372,10 @@ $(document).ready(function() {
         $('.gallery-item').on('click', function() {
             modal.css('display', 'block');
             modalImg.attr('src', $(this).find('img').attr('src'));
-            modalDescription.html($(this).find('.
-                                               image-description').html());
+            modalDescription.html($(this).find('.image-description').html());
         });
-
-        closeBtn.on('click', function() {
+        
+closeBtn.on('click', function() {
             modal.css('display', 'none');
         });
 
