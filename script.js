@@ -1,5 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM fully loaded');
+$(document).ready(function() {
+    console.log('DOM fully loaded and jQuery is ready');
 
     const BASE_URL = "https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/";
     let services = {};
@@ -23,14 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadJSONData() {
-        fetch('data.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
+        $.getJSON('data.json')
+            .done(function(data) {
                 console.log('JSON data loaded successfully:', data);
                 services = data.services;
                 renderServices('masajes');
@@ -38,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setupFilters();
                 setupServiceCategories();
             })
-            .catch(error => {
+            .fail(function(jqxhr, textStatus, error) {
                 console.error('Error loading the JSON file:', error);
                 const servicesList = getElement('services-list');
                 const packageList = getElement('package-list');
@@ -63,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         services[category].forEach((service, index) => {
             console.log(`Rendering service ${index + 1}:`, service);
-            const serviceElement = template.content.cloneNode(true);
+            const serviceElement = document.importNode(template.content, true);
             
             serviceElement.querySelector('.service-title').textContent = service.title || 'Sin título';
             
@@ -127,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         services.paquetes.forEach((pkg, index) => {
             console.log(`Rendering package ${index + 1}:`, pkg);
-            const packageElement = template.content.cloneNode(true);
+            const packageElement = document.importNode(template.content, true);
             
             packageElement.querySelector('.package-title').textContent = pkg.title || 'Sin título';
             packageElement.querySelector('.package-description').textContent = pkg.description || 'Sin descripción';
@@ -215,29 +209,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        document.addEventListener('click', (event) => {
-            if (!translateIcon.contains(event.target) && !languageOptions.contains(event.target)) {
+        $(document).on('click', function(event) {
+            if (!$(event.target).closest('#translate-icon, .language-options').length) {
                 languageOptions.style.display = 'none';
             }
         });
     }
 
     function setupServiceCategories() {
-        const categoryButtons = document.querySelectorAll('input[name="service-category"]');
-        categoryButtons.forEach(button => {
-            button.addEventListener('change', () => {
-                const category = button.value;
-                renderServices(category);
-                setupBenefitsNav(category);
-            });
+        $('input[name="service-category"]').on('change', function() {
+            const category = $(this).val();
+            renderServices(category);
+            setupBenefitsNav(category);
         });
     }
 
     function setupBenefitsNav(category) {
-        const benefitsNav = document.querySelector('.benefits-nav');
-        if (!benefitsNav) return;
+        const benefitsNav = $('.benefits-nav');
+        if (!benefitsNav.length) return;
 
-        benefitsNav.innerHTML = '';
+        benefitsNav.empty();
         const allBenefits = new Set();
 
         services[category].forEach(service => {
@@ -246,24 +237,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const allButton = document.createElement('button');
-        allButton.classList.add('benefit-btn', 'active');
-        allButton.dataset.filter = 'all';
-        allButton.innerHTML = `
-            <img src="${BASE_URL}todos.png" alt="Todos">
-            <span>Todos</span>
-        `;
-        benefitsNav.appendChild(allButton);
+        const allButton = $('<button>')
+            .addClass('benefit-btn active')
+            .attr('data-filter', 'all')
+            .html(`
+                <img src="${BASE_URL}todos.png" alt="Todos">
+                <span>Todos</span>
+            `);
+        benefitsNav.append(allButton);
 
         allBenefits.forEach(benefit => {
-            const button = document.createElement('button');
-            button.classList.add('benefit-btn');
-            button.dataset.filter = benefit.toLowerCase().replace(/\s+/g, '-');
-            button.innerHTML = `
-                <img src="${BASE_URL}${benefit.toLowerCase().replace(/\s+/g, '-')}.png" alt="${benefit}">
-                <span>${benefit}</span>
-            `;
-            benefitsNav.appendChild(button);
+            const button = $('<button>')
+                .addClass('benefit-btn')
+                .attr('data-filter', benefit.toLowerCase().replace(/\s+/g, '-'))
+                .html(`
+                    <img src="${BASE_URL}${benefit.toLowerCase().replace(/\s+/g, '-')}.png" alt="${benefit}">
+                    <span>${benefit}</span>
+                `);
+            benefitsNav.append(button);
         });
 
         setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
@@ -279,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             popup.style.display = 'none';
         });
 
-        window.addEventListener('click', (event) => {
+        $(window).on('click', function(event) {
             if (event.target === popup) {
                 console.log('Closing popup (clicked outside)');
                 popup.style.display = 'none';
@@ -296,8 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('GSAP and ScrollTrigger are loaded');
         gsap.registerPlugin(ScrollTrigger);
 
-        const gallery = document.querySelector('.gallery-container');
-        if (!gallery) {
+        const gallery = $('.gallery-container');
+        if (!gallery.length) {
             console.error('Gallery container not found');
             return;
         }
@@ -306,26 +297,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const images = gsap.utils.toArray('.gallery-container img');
         
         ScrollTrigger.create({
-            trigger: gallery,
+            trigger: gallery[0],
             start: "top 80%",
             end: "bottom 20%",
             onEnter: () => {
                 console.log('Gallery entered viewport');
-                gallery.classList.add('is-visible');
+                gallery.addClass('is-visible');
                 animateImages();
             },
             onLeave: () => {
                 console.log('Gallery left viewport');
-                gallery.classList.remove('is-visible');
+                gallery.removeClass('is-visible');
             },
             onEnterBack: () => {
                 console.log('Gallery entered viewport (scrolling up)');
-                gallery.classList.add('is-visible');
+                gallery.addClass('is-visible');
                 animateImages();
             },
             onLeaveBack: () => {
                 console.log('Gallery left viewport (scrolling up)');
-                gallery.classList.remove('is-visible');
+                gallery.removeClass('is-visible');
             }
         });
 
@@ -349,28 +340,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupGalleryModal() {
-        const modal = getElement('imageModal');
-        const modalImg = getElement('modalImage');
-        const modalDescription = getElement('modalDescription');
-        const closeBtn = modal.querySelector('.close');
+        const modal = $('#imageModal');
+        const modalImg = $('#modalImage');
+        const modalDescription = $('#modalDescription');
+        const closeBtn = modal.find('.close');
 
-        document.querySelectorAll('.gallery-item').forEach(item => {
-            item.addEventListener('click', function() {
-                modal.style.display = "block";
-                modalImg.src = this.querySelector('img').src;
-                modalDescription.innerHTML = this.querySelector('.image-description').innerHTML;
-            });
+        $('.gallery-item').on('click', function() {
+            modal.css('display', 'block');
+            modalImg.attr('src', $(this).find('img').attr('src'));
+            modalDescription.html($(this).find('.image-description').html());
         });
 
-        closeBtn.onclick = function() {
-            modal.style.display = "none";
-        }
+        closeBtn.on('click', function() {
+            modal.css('display', 'none');
+        });
 
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
+        $(window).on('click', function(event) {
+            if (event.target === modal[0]) {
+                modal.css('display', 'none');
             }
-        }
+        });
     }
 
     function setupFilters() {
@@ -379,26 +368,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupFilterButtons(navSelector, listSelector, itemSelector) {
-        const filterButtons = document.querySelectorAll(`${navSelector} button`);
-        const items = document.querySelectorAll(itemSelector);
-
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const filter = button.getAttribute('data-filter');
-                
-                // Actualizar botones activos
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                // Filtrar elementos
-                items.forEach(item => {
-                    if (filter === 'all' || item.classList.contains(filter)) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
+        $(navSelector).on('click', 'button', function() {
+            const filter = $(this).data('filter');
+            
+            // Actualizar botones activos
+            $(navSelector + ' button').removeClass('active');
+            $(this).addClass('active');
+            
+            // Filtrar elementos
+            $(itemSelector).each(function() {
+                if (filter === 'all' || $(this).hasClass(filter)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
             });
+        });
+    }
+
+    function initializeSlickCarousel() {
+        $('.gallery-carousel').slick({
+            dots: true,
+            infinite: true,
+            speed: 300,
+            slidesToShow: 3,
+            slidesToScroll: 1,
+            responsive: [
+                {
+                    breakpoint: 1024,
+                    settings: {
+                        slidesToShow: 2,
+                        slidesToScroll: 1,
+                        infinite: true,
+                        dots: true
+                    }
+                },
+                {
+                    breakpoint: 600,
+                    settings: {
+                        slidesToShow: 1,
+                        slidesToScroll: 1
+                    }
+                }
+            ]
+        });
+    }
+
+    function setupDarkModeToggle() {
+        $('#color_mode').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('body').addClass('dark-preview').removeClass('white-preview');
+            } else {
+                $('body').addClass('white-preview').removeClass('dark-preview');
+            }
         });
     }
 
@@ -408,6 +430,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPopup();
         setupGalleryAnimations();
         setupGalleryModal();
+        initializeSlickCarousel();
+        setupDarkModeToggle();
     }
 
     init();
