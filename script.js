@@ -157,7 +157,8 @@ $(document).ready(function() {
         const popupTitle = getElement('popup-title');
         const popupImage = getElement('popup-image');
         const popupDescription = getElement('popup-description');
-        const popupBenefits = getElement('popup-benefits');
+        const popupBenefits = get
+        Element('popup-benefits');
         const popupDuration = getElement('popup-duration');
         if (!popup || !popupTitle || !popupImage || !popupDescription || !popupBenefits || !popupDuration) return;
 
@@ -387,31 +388,36 @@ $(document).ready(function() {
     }
 
     function initializeSlickCarousel() {
-        $('.gallery-carousel').slick({
-            dots: true,
-            infinite: true,
-            speed: 300,
-            slidesToShow: 3,
-            slidesToScroll: 1,
-            responsive: [
-                {
-                    breakpoint: 1024,
-                    settings: {
-                        slidesToShow: 2,
-                        slidesToScroll: 1,
-                        infinite: true,
-                        dots: true
+        if ($.fn.slick) {
+            $('.gallery-carousel').slick({
+                dots: true,
+                infinite: true,
+                speed: 300,
+                slidesToShow: 3,
+                slidesToScroll: 1,
+                responsive: [
+                    {
+                        breakpoint: 1024,
+                        settings: {
+                            slidesToShow: 2,
+                            slidesToScroll: 1,
+                            infinite: true,
+                            dots: true
+                        }
+                    },
+                    {
+                        breakpoint: 600,
+                        settings: {
+                            slidesToShow: 1,
+                            slidesToScroll: 1
+                        }
                     }
-                },
-                {
-                    breakpoint: 600,
-                    settings: {
-                        slidesToShow: 1,
-                        slidesToScroll: 1
-                    }
-                }
-            ]
-        });
+                ]
+            });
+            console.log('Slick carousel initialized');
+        } else {
+            console.error('Slick not found. Make sure it is loaded properly.');
+        }
     }
 
     function setupDarkModeToggle() {
@@ -428,7 +434,11 @@ $(document).ready(function() {
         loadJSONData();
         setupLanguageSelector();
         setupPopup();
-        setupGalleryAnimations();
+        if ($('.gallery-container').length) {
+            setupGalleryAnimations();
+        } else {
+            console.log('Gallery container not found, skipping animations');
+        }
         setupGalleryModal();
         initializeSlickCarousel();
         setupDarkModeToggle();
