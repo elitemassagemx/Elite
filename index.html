@@ -20,8 +20,11 @@
     
     <!-- Web Manifest -->
     <link rel="manifest" href="site.webmanifest">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body>
+<body class="white-preview">
     <header id="sticky-header">
         <div class="container">
             <div class="header-top">
@@ -29,14 +32,24 @@
                     <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/logo.png" alt="Elite Massage Logo" class="logo" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-logo.png';">
                     <h1>Elite Massage</h1>
                 </div>
-                <div class="language-selector">
-                    <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/trad.png" alt="Traducir" id="translate-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ICONOS/error.jpg';">
-                    <div class="language-options">
-                        <button class="lang-option" data-lang="es"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/omx.png" alt="Bandera de México" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> Español</button>
-                        <button class="lang-option" data-lang="en"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ous.png" alt="Bandera de Estados Unidos" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> English</button>
-                        <button class="lang-option" data-lang="iw"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ois.png" alt="Bandera de Israel" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> עברית</button>
-                        <button class="lang-option" data-lang="fr"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ofr.png" alt="Bandera de Francia" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> Français</button>
-                        <button class="lang-option" data-lang="zh-CN"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/och.png" alt="Bandera de China" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> 中文</button>
+                <div class="header-controls">
+                    <div class="language-selector">
+                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/trad.png" alt="Traducir" id="translate-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ICONOS/error.jpg';">
+                        <div class="language-options">
+                            <button class="lang-option" data-lang="es"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/omx.png" alt="Bandera de México" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> Español</button>
+                            <button class="lang-option" data-lang="en"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ous.png" alt="Bandera de Estados Unidos" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> English</button>
+                            <button class="lang-option" data-lang="iw"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ois.png" alt="Bandera de Israel" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> עברית</button>
+                            <button class="lang-option" data-lang="fr"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ofr.png" alt="Bandera de Francia" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> Français</button>
+                            <button class="lang-option" data-lang="zh-CN"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/och.png" alt="Bandera de China" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> 中文</button>
+                        </div>
+                    </div>
+                    <div class="dark-mode-toggle">
+                        <i class="fa fa-sun-o" aria-hidden="true"></i>
+                        <label class="switch btn-color-mode-switch">
+                            <input type="checkbox" name="color_mode" id="color_mode" value="1">
+                            <label for="color_mode" data-on="Dark" data-off="Light" class="btn-color-mode-switch-inner"></label>
+                        </label>
+                        <i class="fa fa-moon-o" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div id="google_translate_element" style="display:none;"></div>
@@ -56,9 +69,15 @@
             <div class="container">
                 <h2>Nuestros Servicios</h2>
                 <div class="service-category-buttons">
-                    <button class="category-btn active" data-category="individual">Individual</button>
-                    <button class="category-btn" data-category="premium">Premium</button>
-                    <button class="category-btn" data-category="experiencias">Experiencias</button>
+                    <div class="toggle-switch">
+                        <input type="radio" id="individual" name="service-category" value="individual" checked>
+                        <label for="individual">Individual</label>
+                        <input type="radio" id="premium" name="service-category" value="premium">
+                        <label for="premium">Premium</label>
+                        <input type="radio" id="experiencias" name="service-category" value="experiencias">
+                        <label for="experiencias">Experiencias</label>
+                        <span class="slider"></span>
+                    </div>
                 </div>
                 <div class="benefits-nav">
                     <!-- Los botones de beneficios se generarán dinámicamente con JavaScript -->
@@ -94,7 +113,7 @@
         <section id="galeria" class="section gallery">
             <div class="container">
                 <h2>Galería de Imágenes</h2>
-                <div class="gallery-container">
+                <div class="gallery-carousel">
                     <div class="gallery-item">
                         <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/SILLASH.jpg" alt="Sillas choco vino esquinado H">
                         <div class="image-overlay">
@@ -247,6 +266,14 @@
     <!-- GSAP y ScrollTrigger para animaciones -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+    
+    <!-- Slick Carousel para la galería -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Tu script personalizado -->
     <script src="script.js"></script>
