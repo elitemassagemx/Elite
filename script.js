@@ -1,5 +1,5 @@
-$(document).ready(function() {
-    console.log('DOM fully loaded and jQuery is ready');
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded');
 
     const BASE_URL = "https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/";
     let services = {};
@@ -7,6 +7,7 @@ $(document).ready(function() {
     function handleImageError(img) {
         console.warn(`Failed to load image: ${img.src}`);
         img.style.display = 'none';
+        img.src = `${BASE_URL}fallback-image.png`;
     }
 
     function buildImageUrl(iconPath) {
@@ -23,35 +24,23 @@ $(document).ready(function() {
     }
 
     function loadJSONData() {
-        const jsonFiles = ['data.json', 'exper.json', 'prem.json'];
-        const promises = jsonFiles.map(file => 
-            $.getJSON(file).catch(error => {
-                console.error(`Error loading ${file}:`, error);
-                return null;
-            })
-        );
-
-        Promise.all(promises)
-            .then(results => {
-                const [data, exper, prem] = results;
-                if (data && data.services) {
-                    services = {
-                        ...data.services,
-                        ...(exper || {}),
-                        ...(prem || {})
-                    };
-                    console.log('All JSON data loaded successfully:', services);
-                    renderServices('individual');
-                    renderServices('pareja');
-                    renderPackages();
-                    setupFilters();
-                    setupServiceCategories();
-                } else {
-                    console.error('Invalid data structure in JSON files');
+        fetch('data.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                return response.json();
+            })
+            .then(data => {
+                console.log('JSON data loaded successfully');
+                services = data.services;
+                renderServices('individual');
+                renderPackages();
+                setupBenefitsNav('individual');
+                setupPackageNav();
             })
             .catch(error => {
-                console.error('Error loading JSON files:', error);
+                console.error('Error loading the JSON file:', error);
                 const servicesList = getElement('services-list');
                 const packageList = getElement('package-list');
                 if (servicesList) servicesList.innerHTML = '<p>Error al cargar los servicios. Por favor, intente más tarde.</p>';
@@ -61,7 +50,7 @@ $(document).ready(function() {
 
     function renderServices(category) {
         console.log(`Rendering services for category: ${category}`);
-        const servicesList = getElement(category === 'individual' ? 'services-list' : 'couple-services-list');
+        const servicesList = getElement('services-list');
         const template = getElement('service-template');
         if (!servicesList || !template) return;
 
@@ -73,40 +62,34 @@ $(document).ready(function() {
             return;
         }
 
-        services[category].forEach((service, index) => {
-            console.log(`Rendering service ${index + 1}:`, service);
-            const serviceElement = document.importNode(template.content, true);
+        services[category].forEach(service => {
+            const serviceElement = template.content.cloneNode(true);
             
-            serviceElement.querySelector('.service-title').textContent = service.title || 'Sin título';
+            serviceElement.querySelector('.service-title').textContent = service.title;
             
             const serviceIcon = serviceElement.querySelector('.service-icon');
             serviceIcon.src = buildImageUrl(service.icon);
             serviceIcon.onerror = () => handleImageError(serviceIcon);
             
-            serviceElement.querySelector('.service-description').textContent = service.description || 'Sin descripción';
+            serviceElement.querySelector('.service-description').textContent = service.description;
             
             const benefitsIcon = serviceElement.querySelector('.benefits-icon');
             benefitsIcon.src = buildImageUrl(Array.isArray(service.benefitsIcons) ? service.benefitsIcons[0] : service.benefitsIcons);
             benefitsIcon.onerror = () => handleImageError(benefitsIcon);
             
-            serviceElement.querySelector('.service-benefits').textContent = Array.isArray(service.benefits) ? service.benefits.join(', ') : 'No especificado';
+            serviceElement.querySelector('.service-benefits').textContent = service.benefits.join(', ');
             
             const durationIcon = serviceElement.querySelector('.duration-icon');
             durationIcon.src = buildImageUrl(service.durationIcon);
             durationIcon.onerror = () => handleImageError(durationIcon);
             
-            serviceElement.querySelector('.service-duration').textContent = service.duration || 'Duración no especificada';
+            serviceElement.querySelector('.service-duration').textContent = service.duration;
 
             const reserveButton = serviceElement.querySelector('.reserve-button');
             reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', service.title));
 
-            const moreIcon = serviceElement.querySelector('.more-icon');
-            moreIcon.addEventListener('click', () => showPopup(service));
-
-            const serviceBackground = serviceElement.querySelector('.service-background');
-            if (service.backgroundImage) {
-                serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
-            }
+            const infoButton = serviceElement.querySelector('.info-button');
+            infoButton.addEventListener('click', () => showPopup(service));
 
             const serviceItem = serviceElement.querySelector('.service-item');
             if (Array.isArray(service.benefits)) {
@@ -117,7 +100,7 @@ $(document).ready(function() {
 
             servicesList.appendChild(serviceElement);
         });
-        console.log(`Rendered ${services[category].length} services for ${category}`);
+        console.log(`Rendered ${services[category].length} services`);
     }
 
     function renderPackages() {
@@ -136,21 +119,20 @@ $(document).ready(function() {
             return;
         }
 
-        services.paquetes.forEach((pkg, index) => {
-            console.log(`Rendering package ${index + 1}:`, pkg);
-            const packageElement = document.importNode(template.content, true);
+        services.paquetes.forEach(pkg => {
+            const packageElement = template.content.cloneNode(true);
             
-            packageElement.querySelector('.package-title').textContent = pkg.title || 'Sin título';
-            packageElement.querySelector('.package-description').textContent = pkg.description || 'Sin descripción';
-            packageElement.querySelector('.package-includes-list').textContent = Array.isArray(pkg.includes) ? pkg.includes.join(', ') : 'No especificado';
-            packageElement.querySelector('.package-duration-text').textContent = pkg.duration || 'Duración no especificada';
-            packageElement.querySelector('.package-benefits-list').textContent = Array.isArray(pkg.benefits) ? pkg.benefits.join(', ') : 'No especificado';
+            packageElement.querySelector('.package-title').textContent = pkg.title;
+            packageElement.querySelector('.package-description').textContent = pkg.description;
+            packageElement.querySelector('.package-includes-list').textContent = pkg.includes.join(', ');
+            packageElement.querySelector('.package-duration-text').textContent = pkg.duration;
+            packageElement.querySelector('.package-benefits-list').textContent = pkg.benefits.join(', ');
 
             const reserveButton = packageElement.querySelector('.reserve-button');
             reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', pkg.title));
 
-            const moreIcon = packageElement.querySelector('.more-icon');
-            moreIcon.addEventListener('click', () => showPopup(pkg));
+            const infoButton = packageElement.querySelector('.info-button');
+            infoButton.addEventListener('click', () => showPopup(pkg));
 
             const packageBackground = packageElement.querySelector('.package-background');
             if (pkg.backgroundImage) {
@@ -173,17 +155,13 @@ $(document).ready(function() {
         const popupTitle = getElement('popup-title');
         const popupImage = getElement('popup-image');
         const popupDescription = getElement('popup-description');
-        const popupBenefits = getElement('popup-benefits');
-        const popupDuration = getElement('popup-duration');
-        if (!popup || !popupTitle || !popupImage || !popupDescription || !popupBenefits || !popupDuration) return;
+        if (!popup || !popupTitle || !popupImage || !popupDescription) return;
 
         popupTitle.textContent = data.title || '';
         popupImage.src = buildImageUrl(data.popupImage || data.image);
         popupImage.alt = data.title || '';
         popupImage.onerror = () => handleImageError(popupImage);
         popupDescription.textContent = data.popupDescription || data.description || '';
-        popupBenefits.textContent = Array.isArray(data.benefits) ? data.benefits.join(', ') : data.benefits || '';
-        popupDuration.textContent = data.duration || '';
 
         popup.style.display = 'block';
     }
@@ -225,31 +203,30 @@ $(document).ready(function() {
             });
         });
 
-        $(document).on('click', function(event) {
-            if (!$(event.target).closest('#translate-icon, .language-options').length) {
+        document.addEventListener('click', (event) => {
+            if (!translateIcon.contains(event.target) && !languageOptions.contains(event.target)) {
                 languageOptions.style.display = 'none';
             }
         });
     }
 
-    function setupServiceCategories() {
-        $('input[name="service-category"]').on('change', function() {
-            const category = $(this).val();
-            if (category === 'individual' || category === 'pareja') {
-                renderServices(category);
-                setupBenefitsNav(category);
-            } else if (category === 'paquetes') {
-                renderPackages();
-                setupPackageNav();
-            }
+    function setupCategorySelector() {
+        document.querySelectorAll('.choice-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                console.log(`Choice chip clicked: ${chip.dataset.category}`);
+                document.querySelectorAll('.choice-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                renderServices(chip.dataset.category);
+                setupBenefitsNav(chip.dataset.category);
+            });
         });
     }
 
     function setupBenefitsNav(category) {
-        const benefitsNav = $('.benefits-nav');
-        if (!benefitsNav.length) return;
+        const benefitsNav = document.querySelector('.benefits-nav');
+        if (!benefitsNav) return;
 
-        benefitsNav.empty();
+        benefitsNav.innerHTML = '';
         const allBenefits = new Set();
 
         services[category].forEach(service => {
@@ -258,34 +235,34 @@ $(document).ready(function() {
             }
         });
 
-        const allButton = $('<button>')
-            .addClass('benefit-btn active')
-            .attr('data-filter', 'all')
-            .html(`
-                <img src="${BASE_URL}todos.png" alt="Todos">
-                <span>Todos</span>
-            `);
-        benefitsNav.append(allButton);
+        const allButton = document.createElement('button');
+        allButton.classList.add('benefit-btn', 'active');
+        allButton.dataset.filter = 'all';
+        allButton.innerHTML = `
+            <img src="${BASE_URL}todos.png" alt="Todos">
+            <span>Todos</span>
+        `;
+        benefitsNav.appendChild(allButton);
 
         allBenefits.forEach(benefit => {
-            const button = $('<button>')
-                .addClass('benefit-btn')
-                .attr('data-filter', benefit.toLowerCase().replace(/\s+/g, '-'))
-                .html(`
-                    <img src="${BASE_URL}${benefit.toLowerCase().replace(/\s+/g, '-')}.png" alt="${benefit}">
-                    <span>${benefit}</span>
-                `);
-            benefitsNav.append(button);
+            const button = document.createElement('button');
+            button.classList.add('benefit-btn');
+            button.dataset.filter = benefit.toLowerCase().replace(/\s+/g, '-');
+            button.innerHTML = `
+                <img src="${BASE_URL}${benefit.toLowerCase().replace(/\s+/g, '-')}.png" alt="${benefit}">
+                <span>${benefit}</span>
+            `;
+            benefitsNav.appendChild(button);
         });
 
         setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
     }
 
     function setupPackageNav() {
-        const packageNav = $('.package-nav');
-        if (!packageNav.length) return;
+        const packageNav = document.querySelector('.package-nav');
+        if (!packageNav) return;
 
-        packageNav.empty();
+        packageNav.innerHTML = '';
         const packageTypes = new Set();
 
         services.paquetes.forEach(pkg => {
@@ -294,32 +271,57 @@ $(document).ready(function() {
             }
         });
 
-        const allButton = $('<button>')
-            .addClass('package-btn active')
-            .attr('data-filter', 'all')
-            .html(`
-                <img src="${BASE_URL}todos-paquetes.png" alt="Todos los Paquetes">
-                <span>Todos los Paquetes</span>
-            `);
-        packageNav.append(allButton);
+        const allButton = document.createElement('button');
+        allButton.classList.add('package-btn', 'active');
+        allButton.dataset.filter = 'all';
+        allButton.innerHTML = `
+            <img src="${BASE_URL}todos-paquetes.png" alt="Todos los Paquetes">
+            <span>Todos los Paquetes</span>
+        `;
+        packageNav.appendChild(allButton);
 
         packageTypes.forEach(type => {
-            const button = $('<button>')
-                .addClass('package-btn')
-                .attr('data-filter', type.toLowerCase().replace(/\s+/g, '-'))
-                .html(`
-                    <img src="${BASE_URL}${type.toLowerCase().replace(/\s+/g, '-')}.png" alt="${type}">
-                    <span>${type}</span>
-                `);
-            packageNav.append(button);
+            const button = document.createElement('button');
+            button.classList.add('package-btn');
+            button.dataset.filter = type.toLowerCase().replace(/\s+/g, '-');
+            button.innerHTML = `
+                <img src="${BASE_URL}${type.toLowerCase().replace(/\s+/g, '-')}.png" alt="${type}">
+                <span>${type}</span>
+            `;
+            packageNav.appendChild(button);
         });
 
         setupFilterButtons('.package-nav', '#package-list', '.package-item');
     }
 
+    function setupFilterButtons(navSelector, listSelector, itemSelector) {
+        const navElement = document.querySelector(navSelector);
+        const listElement = document.querySelector(listSelector);
+
+        if (!navElement || !listElement) return;
+
+        navElement.addEventListener('click', (event) => {
+            if (event.target.matches('button') || event.target.closest('button')) {
+                const button = event.target.matches('button') ? event.target : event.target.closest('button');
+                const filter = button.dataset.filter;
+                
+                navElement.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                listElement.querySelectorAll(itemSelector).forEach(item => {
+                    if (filter === 'all' || item.classList.contains(filter)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    }
+
     function setupPopup() {
         const popup = getElement('popup');
-        const closeButton = document.querySelector('.close');
+        const closeButton = popup.querySelector('.close');
         if (!popup || !closeButton) return;
 
         closeButton.addEventListener('click', () => {
@@ -327,7 +329,7 @@ $(document).ready(function() {
             popup.style.display = 'none';
         });
 
-        $(window).on('click', function(event) {
+        window.addEventListener('click', (event) => {
             if (event.target === popup) {
                 console.log('Closing popup (clicked outside)');
                 popup.style.display = 'none';
@@ -344,8 +346,8 @@ $(document).ready(function() {
         console.log('GSAP and ScrollTrigger are loaded');
         gsap.registerPlugin(ScrollTrigger);
 
-        const gallery = $('.gallery-container');
-        if (!gallery.length) {
+        const gallery = document.querySelector('.gallery-container');
+        if (!gallery) {
             console.error('Gallery container not found');
             return;
         }
@@ -354,31 +356,30 @@ $(document).ready(function() {
         const images = gsap.utils.toArray('.gallery-container img');
         
         ScrollTrigger.create({
-            trigger: gallery[0],
+            trigger: gallery,
             start: "top 80%",
             end: "bottom 20%",
             onEnter: () => {
                 console.log('Gallery entered viewport');
-                gallery.addClass('is-visible');
+                gallery.classList.add('is-visible');
                 animateImages();
             },
             onLeave: () => {
                 console.log('Gallery left viewport');
-                gallery.removeClass('is-visible');
+                gallery.classList.remove('is-visible');
             },
             onEnterBack: () => {
                 console.log('Gallery entered viewport (scrolling up)');
-                gallery.addClass('is-visible');
+                gallery.classList.add('is-visible');
                 animateImages();
             },
             onLeaveBack: () => {
                 console.log('Gallery left viewport (scrolling up)');
-                gallery.removeClass('is-visible');
+                gallery.classList.remove('is-visible');
             }
         });
 
         function animateImages() {
-            images.function animateImages() {
             images.forEach((img, index) => {
                 gsap.fromTo(img, 
                     { scale: 0.8, opacity: 0 },
@@ -389,7 +390,7 @@ $(document).ready(function() {
                         ease: "power2.out",
                         delay: index * 0.1,
                         onStart: () => console.log(`Image ${index + 1} animation started`)
-                    }
+                        }
                 );
             });
         }
@@ -398,108 +399,76 @@ $(document).ready(function() {
     }
 
     function setupGalleryModal() {
-        const modal = $('#imageModal');
-        const modalImg = $('#modalImage');
-        const modalDescription = $('#modalDescription');
-        const closeBtn = modal.find('.close');
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalDescription = document.getElementById('modalDescription');
+        const closeBtn = modal.querySelector('.close');
 
-        $('.gallery-item').on('click', function() {
-            modal.css('display', 'block');
-            modalImg.attr('src', $(this).find('img').attr('src'));
-            modalDescription.html($(this).find('.image-description').html());
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', function() {
+                modal.style.display = "block";
+                modalImg.src = this.querySelector('img').src;
+                modalDescription.innerHTML = this.querySelector('.image-description').innerHTML;
+            });
         });
         
-        closeBtn.on('click', function() {
-            modal.css('display', 'none');
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = "none";
         });
 
-        $(window).on('click', function(event) {
-            if (event.target === modal[0]) {
-                modal.css('display', 'none');
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
             }
         });
-    }
-
-    function setupFilters() {
-        setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
-        setupFilterButtons('.package-nav', '#package-list', '.package-item');
-    }
-
-    function setupFilterButtons(navSelector, listSelector, itemSelector) {
-        $(navSelector).on('click', 'button', function() {
-            const filter = $(this).data('filter');
-            
-            // Actualizar botones activos
-            $(navSelector + ' button').removeClass('active');
-            $(this).addClass('active');
-            
-            // Filtrar elementos
-            $(itemSelector).each(function() {
-                if (filter === 'all' || $(this).hasClass(filter)) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
-            });
-        });
-    }
-
-    function initializeSlickCarousel() {
-        if ($.fn.slick) {
-            $('.gallery-carousel').slick({
-                dots: true,
-                infinite: true,
-                speed: 300,
-                slidesToShow: 3,
-                slidesToScroll: 1,
-                responsive: [
-                    {
-                        breakpoint: 1024,
-                        settings: {
-                            slidesToShow: 2,
-                            slidesToScroll: 1,
-                            infinite: true,
-                            dots: true
-                        }
-                    },
-                    {
-                        breakpoint: 600,
-                        settings: {
-                            slidesToShow: 1,
-                            slidesToScroll: 1
-                        }
-                    }
-                ]
-            });
-            console.log('Slick carousel initialized');
-        } else {
-            console.error('Slick not found. Make sure it is loaded properly.');
-        }
     }
 
     function setupDarkModeToggle() {
-        $('#color_mode').on('change', function() {
-            if ($(this).is(':checked')) {
-                $('body').addClass('dark-preview').removeClass('white-preview');
+        const colorModeCheckbox = document.getElementById('color_mode');
+        if (!colorModeCheckbox) return;
+
+        colorModeCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('dark-preview');
+                document.body.classList.remove('white-preview');
             } else {
-                $('body').addClass('white-preview').removeClass('dark-preview');
+                document.body.classList.add('white-preview');
+                document.body.classList.remove('dark-preview');
             }
         });
+    }
+
+    function setupStickyHeader() {
+        const header = document.getElementById('sticky-header');
+        const fixedBar = document.querySelector('.fixed-bar');
+        if (!header || !fixedBar) return;
+
+        let lastScrollTop = 0;
+
+        window.addEventListener('scroll', () => {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop) {
+                // Scrolling down
+                header.style.top = '-100px';
+                fixedBar.style.bottom = '0';
+            } else {
+                // Scrolling up
+                header.style.top = '0';
+                fixedBar.style.bottom = '-100px';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
     }
 
     function init() {
         loadJSONData();
         setupLanguageSelector();
+        setupCategorySelector();
         setupPopup();
-        if ($('.gallery-container').length) {
-            setupGalleryAnimations();
-        } else {
-            console.log('Gallery container not found, skipping animations');
-        }
+        setupGalleryAnimations();
         setupGalleryModal();
-        initializeSlickCarousel();
         setupDarkModeToggle();
-        setupServiceCategories();
+        setupStickyHeader();
     }
 
     init();
