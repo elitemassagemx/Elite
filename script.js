@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderServices('individual');
                 renderPackages();
                 setupFilters();
+                setupServiceCategories();
             })
             .catch(error => {
                 console.error('Error loading the JSON file:', error);
@@ -189,7 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
         var selectField = document.querySelector('.goog-te-combo');
         if (selectField) {
             selectField.value = lang;
-            selectField.dispatchEvent(new Event('change'));
+            selectField.disp
+            
+atchEvent(new Event('change'));
         } else {
             console.error('Google Translate dropdown not found');
         }
@@ -221,15 +224,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function setupCategorySelector() {
-        const categoryToggle = getElement('categoryToggle');
-        if (!categoryToggle) return;
-
-        categoryToggle.addEventListener('change', (event) => {
-            const category = event.target.checked ? 'pareja' : 'individual';
-            console.log(`Category changed to: ${category}`);
-            renderServices(category);
+    function setupServiceCategories() {
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.dataset.category;
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                renderServices(category);
+                setupBenefitsNav(category);
+            });
         });
+    }
+
+    function setupBenefitsNav(category) {
+        const benefitsNav = document.querySelector('.benefits-nav');
+        if (!benefitsNav) return;
+
+        benefitsNav.innerHTML = '';
+        const allBenefits = new Set();
+
+        services[category].forEach(service => {
+            if (Array.isArray(service.benefits)) {
+                service.benefits.forEach(benefit => allBenefits.add(benefit));
+            }
+        });
+
+        const allButton = document.createElement('button');
+        allButton.classList.add('benefit-btn', 'active');
+        allButton.dataset.filter = 'all';
+        allButton.innerHTML = `
+            <img src="${BASE_URL}todos.png" alt="Todos">
+            <span>Todos</span>
+        `;
+        benefitsNav.appendChild(allButton);
+
+        allBenefits.forEach(benefit => {
+            const button = document.createElement('button');
+            button.classList.add('benefit-btn');
+            button.dataset.filter = benefit.toLowerCase().replace(/\s+/g, '-');
+            button.innerHTML = `
+                <img src="${BASE_URL}${benefit.toLowerCase().replace(/\s+/g, '-')}.png" alt="${benefit}">
+                <span>${benefit}</span>
+            `;
+            benefitsNav.appendChild(button);
+        });
+
+        setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
     }
 
     function setupPopup() {
@@ -368,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function init() {
         loadJSONData();
         setupLanguageSelector();
-        setupCategorySelector();
         setupPopup();
         setupGalleryAnimations();
         setupGalleryModal();
