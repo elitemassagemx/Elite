@@ -11,9 +11,7 @@ $(document).ready(function() {
 
     function buildImageUrl(iconPath) {
         if (!iconPath) return '';
-        const url = iconPath.startsWith('http') ? iconPath : `${BASE_URL}${iconPath}`;
-        console.log('Built image URL:', url);
-        return url;
+        return iconPath.startsWith('http') ? iconPath : `${BASE_URL}${iconPath}`;
     }
 
     function getElement(id) {
@@ -110,7 +108,6 @@ $(document).ready(function() {
                 serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
             }
 
-            // Añadir clases de filtro basadas en los beneficios
             const serviceItem = serviceElement.querySelector('.service-item');
             if (Array.isArray(service.benefits)) {
                 service.benefits.forEach(benefit => {
@@ -160,7 +157,6 @@ $(document).ready(function() {
                 packageBackground.style.backgroundImage = `url(${buildImageUrl(pkg.backgroundImage)})`;
             }
 
-            // Añadir clase de filtro basada en el tipo de paquete
             const packageItem = packageElement.querySelector('.package-item');
             if (pkg.type) {
                 packageItem.classList.add(pkg.type.toLowerCase().replace(/\s+/g, '-'));
@@ -241,10 +237,11 @@ $(document).ready(function() {
             const category = $(this).val();
             if (category === 'individual' || category === 'pareja') {
                 renderServices(category);
+                setupBenefitsNav(category);
             } else if (category === 'paquetes') {
                 renderPackages();
+                setupPackageNav();
             }
-            setupBenefitsNav(category);
         });
     }
 
@@ -282,6 +279,42 @@ $(document).ready(function() {
         });
 
         setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
+    }
+
+    function setupPackageNav() {
+        const packageNav = $('.package-nav');
+        if (!packageNav.length) return;
+
+        packageNav.empty();
+        const packageTypes = new Set();
+
+        services.paquetes.forEach(pkg => {
+            if (pkg.type) {
+                packageTypes.add(pkg.type);
+            }
+        });
+
+        const allButton = $('<button>')
+            .addClass('package-btn active')
+            .attr('data-filter', 'all')
+            .html(`
+                <img src="${BASE_URL}todos-paquetes.png" alt="Todos los Paquetes">
+                <span>Todos los Paquetes</span>
+            `);
+        packageNav.append(allButton);
+
+        packageTypes.forEach(type => {
+            const button = $('<button>')
+                .addClass('package-btn')
+                .attr('data-filter', type.toLowerCase().replace(/\s+/g, '-'))
+                .html(`
+                    <img src="${BASE_URL}${type.toLowerCase().replace(/\s+/g, '-')}.png" alt="${type}">
+                    <span>${type}</span>
+                `);
+            packageNav.append(button);
+        });
+
+        setupFilterButtons('.package-nav', '#package-list', '.package-item');
     }
 
     function setupPopup() {
@@ -345,6 +378,7 @@ $(document).ready(function() {
         });
 
         function animateImages() {
+            images.function animateImages() {
             images.forEach((img, index) => {
                 gsap.fromTo(img, 
                     { scale: 0.8, opacity: 0 },
@@ -375,7 +409,7 @@ $(document).ready(function() {
             modalDescription.html($(this).find('.image-description').html());
         });
         
-closeBtn.on('click', function() {
+        closeBtn.on('click', function() {
             modal.css('display', 'none');
         });
 
@@ -465,6 +499,7 @@ closeBtn.on('click', function() {
         setupGalleryModal();
         initializeSlickCarousel();
         setupDarkModeToggle();
+        setupServiceCategories();
     }
 
     init();
