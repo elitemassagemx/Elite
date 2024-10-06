@@ -2,9 +2,9 @@
     --primary-color: #D4AF37;
     --secondary-color: #8B4513;
     --text-color: #333;
-    --background-color: #ffffff;
+    --background-color: #4c0026;
     --item-background: #f0f0f0;
-    --header-background: #4c0026;
+    --header-background: #191919;
     --main-blue: #082032;
     --gold: #FFD700;
 }
@@ -70,8 +70,8 @@ a, button {
 }
 
 .logo {
-    width: 100px;
-    height: 100px;
+    width: 95px;
+    height: 95px;
     object-fit: contain;
     margin-right: 10px;
 }
@@ -139,93 +139,76 @@ h1 {
 }
 
 .hero h2 {
-    font-size: 24px;
+    font-size: 36px;
     margin-bottom: 10px;
 }
 
-/* Estilos para el selector de categoría */
-.category-selector {
+/* Estilos para los botones de categoría de servicio */
+.service-category-buttons {
     display: flex;
     justify-content: center;
-    margin-bottom: 2rem;
+    margin-bottom: 20px;
 }
 
-.toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 200px;
-    height: 34px;
-}
-
-.toggle-input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.toggle-label {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 34px;
-}
-
-.toggle-label:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-.toggle-input:checked + .toggle-label {
-    background-color: #2196F3;
-}
-
-.toggle-input:checked + .toggle-label:before {
-    transform: translateX(166px);
-}
-
-.toggle-inner {
-    display: block;
-    width: 200%;
-    margin-left: -100%;
-    transition: margin 0.3s ease-in 0s;
-}
-
-.toggle-inner:before, .toggle-inner:after {
-    float: left;
-    width: 50%;
-    height: 34px;
-    padding: 0;
-    line-height: 34px;
+.category-btn {
+    background-color: var(--primary-color);
     color: white;
-    font-weight: bold;
-    box-sizing: border-box;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.toggle-inner:before {
-    content: "Individual";
-    padding-left: 10px;
-    background-color: #ccc;
-    color: #fff;
+.category-btn.active {
+    background-color: var(--secondary-color);
 }
 
-.toggle-inner:after {
-    content: "En pareja";
-    padding-right: 10px;
-    background-color: #2196F3;
-    color: #fff;
-    text-align: right;
+/* Estilos para las barras de navegación de beneficios y paquetes */
+.benefits-nav, .package-nav {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: auto;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.benefits-nav::-webkit-scrollbar, .package-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.benefit-btn, .package-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 10px;
+    margin: 0 10px;
+    cursor: pointer;
+    transition: transform 0.3s;
+    min-width: 80px;
+}
+
+.benefit-btn img, .package-btn img {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+}
+
+.benefit-btn span, .package-btn span {
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.benefit-btn.active, .package-btn.active {
+    transform: scale(1.1);
 }
 
 /* Grids de servicios y paquetes */
@@ -422,7 +405,6 @@ h1 {
 }
 
 .image-description {
-    font-size: 0.9
     font-size: 0.9rem;
 }
 
@@ -592,11 +574,6 @@ footer {
     margin-bottom: 20px;
 }
 
-.footer-gif {
-    width: 100px;
-    height: 100px;
-}
-
 .social-media {
     margin-top: 10px;
 }
@@ -739,44 +716,17 @@ a:focus, button:focus {
     }
 }
 
-.benefits-nav, .package-nav {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    background-color: #333;
-    padding: 10px 0;
+/* Ajuste del tamaño de los iconos de duración */
+.duration-icon {
+    width: 18px;
+    height: 18px;
 }
 
-.benefit-btn, .package-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 10px;
-    transition: 0.3s;
-    color: #fff;
-}
-
-.benefit-btn img {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 5px;
-}
-
-.benefit-btn span, .package-btn {
-    font-size: 12px;
-    text-align: center;
-}
-
-.benefit-btn.active, .package-btn.active {
-    background-color: rgba(255,255,255,0.2);
-    border-radius: 10px;
-}
-
-/* Asegúrate de que los elementos de servicio y paquete sean visibles por defecto */
-.service-item, .package-item {
-    display: block;
+/* Ajuste del espaciado en los paquetes */
+.package-item .package-title,
+.package-item .package-description,
+.package-item .package-includes,
+.package-item .package-duration,
+.package-item .package-benefits {
+    margin-bottom: 10px;
 }
