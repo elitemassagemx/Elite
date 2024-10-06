@@ -3,172 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Massage</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <title>Elite Massage MX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
-    <!-- Favicon -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    
-    <!-- Web Manifest -->
-    <link rel="manifest" href="site.webmanifest">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/ScrollTrigger.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 </head>
-<body class="white-preview">
+<body>
     <header id="sticky-header">
-        <div class="container">
-            <div class="header-top">
-                <div class="logo-container">
-                    <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/logo.png" alt="Elite Massage Logo" class="logo" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-logo.png';">
-                    <h1>Elite Massage</h1>
-                </div>
-                <div class="header-controls">
-                    <div class="language-selector">
-                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/trad.png" alt="Traducir" id="translate-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ICONOS/error.jpg';">
-                        <div class="language-options">
-                            <button class="lang-option" data-lang="es"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/omx.png" alt="Bandera de México" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> Español</button>
-                            <button class="lang-option" data-lang="en"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ous.png" alt="Bandera de Estados Unidos" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> English</button>
-                            <button class="lang-option" data-lang="iw"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ois.png" alt="Bandera de Israel" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> עברית</button>
-                            <button class="lang-option" data-lang="fr"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/ofr.png" alt="Bandera de Francia" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> Français</button>
-                            <button class="lang-option" data-lang="zh-CN"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/och.png" alt="Bandera de China" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-flag.png';"> 中文</button>
-                        </div>
+        <div class="header-top">
+            <div class="logo-container">
+                <img src="logo.png" alt="Elite Massage MX Logo" class="logo">
+                <h1>Elite Massage MX</h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-selector">
+                    <img src="translate-icon.png" alt="Translate" id="translate-icon">
+                    <div class="language-options">
+                        <button class="lang-option" data-lang="es"><img src="es-flag.png" alt="Español">Español</button>
+                        <button class="lang-option" data-lang="en"><img src="en-flag.png" alt="English">English</button>
                     </div>
-                    <div class="dark-mode-toggle">
+                </div>
+                <div class="dark-mode-toggle">
+                    <div class="btn-container">
                         <i class="fa fa-sun-o" aria-hidden="true"></i>
-                        <label class="switch btn-color-mode-switch">
-                            <input type="checkbox" name="color_mode" id="color_mode" value="1">
-                            <label for="color_mode" data-on="Dark" data-off="Light" class="btn-color-mode-switch-inner"></label>
-                        </label>
                         <i class="fa fa-moon-o" aria-hidden="true"></i>
                     </div>
+                    <div class="btn-color-mode-switch">
+                        <input type="checkbox" id="color_mode" name="color_mode" value="1">
+                        <label for="color_mode" data-on="Dark" data-off="Light" class="btn-color-mode-switch-inner"></label>
+                    </div>
                 </div>
-                <div id="google_translate_element" style="display:none;"></div>
             </div>
         </div>
     </header>
 
-    <main role="main">
-        <section id="inicio" class="section hero">
-            <div class="container">
-                <h2>Bienvenido a tu Oasis de Tranquilidad</h2>
-                <p>Descubre el poder de la relajación y el bienestar en nuestro exclusivo spa de masajes.</p>
-            </div>
+    <main>
+        <section class="hero">
+            <h2>Descubre el lujo del bienestar</h2>
+            <p>Experimenta masajes de clase mundial en la comodidad de tu hogar</p>
         </section>
 
-        <section id="servicios" class="section services">
-            <div class="container">
-                <h2>Nuestros Servicios</h2>
-                <div class="service-category-buttons">
-                    <div class="toggle-switch">
-                        <input type="radio" id="individual" name="service-category" value="individual" checked>
-                        <label for="individual">Individual</label>
-                        <input type="radio" id="premium" name="service-category" value="premium">
-                        <label for="premium">Premium</label>
-                        <input type="radio" id="experiencias" name="service-category" value="experiencias">
-                        <label for="experiencias">Experiencias</label>
-                        <span class="slider"></span>
+        <section class="services" id="services">
+            <div class="toggle-switch">
+                <input type="radio" id="masajes" name="service-category" value="masajes" checked>
+                <label for="masajes">Masajes</label>
+                <input type="radio" id="faciales" name="service-category" value="faciales">
+                <label for="faciales">Faciales</label>
+                <input type="radio" id="paquetes" name="service-category" value="paquetes">
+                <label for="paquetes">Paquetes</label>
+                <span class="slider"></span>
+            </div>
+            
+            <div class="benefits-nav"></div>
+            
+            <div id="services-list" class="services-grid"></div>
+            <div id="package-list" class="services-grid" style="display:none;"></div>
+        </section>
+
+        <template id="service-template">
+            <div class="service-item">
+                <div class="service-background"></div>
+                <div class="service-content">
+                    <h3 class="service-title"><img class="service-icon" src="" alt=""> </h3>
+                    <p class="service-description"></p>
+                    <div class="benefits-container">
+                        <img class="benefits-icon" src="" alt="Beneficios">
+                        <span class="service-benefits"></span>
                     </div>
+                    <div class="duration-container">
+                        <img class="duration-icon" src="" alt="Duración">
+                        <span class="service-duration"></span>
+                    </div>
+                    <div class="service-buttons">
+                        <button class="reserve-button">Reservar</button>
+                    </div>
+                    <div class="more-icon">+</div>
                 </div>
-                <div class="benefits-nav">
-                    <!-- Los botones de beneficios se generarán dinámicamente con JavaScript -->
+            </div>
+        </template>
+
+        <template id="package-template">
+            <div class="package-item">
+                <div class="package-background"></div>
+                <div class="package-content">
+                    <h3 class="package-title"></h3>
+                    <p class="package-description"></p>
+                    <div class="package-includes">
+                        <strong>Incluye:</strong>
+                        <span class="package-includes-list"></span>
+                    </div>
+                    <div class="package-duration">
+                        <strong>Duración:</strong>
+                        <span class="package-duration-text"></span>
+                    </div>
+                    <div class="package-benefits">
+                        <strong>Beneficios:</strong>
+                        <span class="package-benefits-list"></span>
+                    </div>
+                    <div class="button-container">
+                        <button class="reserve-button">Reservar</button>
+                    </div>
+                    <div class="more-icon">+</div>
                 </div>
-                <div id="services-list" class="services-grid"></div>
+            </div>
+        </template>
+
+        <section class="testimonials">
+            <h2>Lo que dicen nuestros clientes</h2>
+            <div class="testimonial">
+                <p>"El mejor masaje que he recibido. Totalmente relajante y rejuvenecedor."</p>
+                <span class="author">- María G.</span>
+            </div>
+            <div class="testimonial">
+                <p>"Increíble experiencia. El terapeuta fue muy profesional y atento a mis necesidades."</p>
+                <span class="author">- Carlos R.</span>
+            </div>
+            <div class="testimonial">
+                <p>"Me encantó poder recibir un masaje de alta calidad en la comodidad de mi hogar."</p>
+                <span class="author">- Laura M.</span>
             </div>
         </section>
 
-        <section id="paquetes" class="section packages">
-            <div class="container">
-                <h2>Paquetes Especiales</h2>
-                <div class="package-nav">
-                    <!-- Los botones de paquetes se generarán dinámicamente con JavaScript -->
-                </div>
-                <div id="package-list"></div>
-            </div>
-        </section>
-
-        <section id="testimonios" class="section testimonials">
-            <div class="container">
-                <h2>Lo que dicen nuestros clientes</h2>
-                <div class="testimonial">
-                    <p>"Una experiencia increíble. El masaje de aromaterapia fue justo lo que necesitaba para relajarme completamente. ¡Volveré pronto!"</p>
-                    <p class="author">- María G.</p>
-                </div>
-                <div class="testimonial">
-                    <p>"El paquete en pareja fue maravilloso. El ambiente, el servicio y los masajes superaron nuestras expectativas. Totalmente recomendado."</p>
-                    <p class="author">- Carlos y Ana</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="galeria" class="section gallery">
-            <div class="container">
-                <h2>Galería de Imágenes</h2>
+        <section class="gallery">
+            <h2>Nuestra Galería</h2>
+            <div class="gallery-container">
                 <div class="gallery-carousel">
                     <div class="gallery-item">
-                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/SILLASH.jpg" alt="Sillas choco vino esquinado H">
+                        <img src="gallery1.jpg" alt="Masaje relajante">
                         <div class="image-overlay">
-                            <h3 class="image-title">Ambiente Acogedor</h3>
-                            <p class="image-description">Disfruta de nuestro espacio de relajación único.</p>
+                            <h3 class="image-title">Masaje Relajante</h3>
+                            <p class="image-description">Disfruta de nuestro masaje signature para aliviar el estrés y la tensión.</p>
                         </div>
-                        <div class="more-icon">+</div>
                     </div>
                     <div class="gallery-item">
-                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/QUESOSAHM.jpg" alt="Sillas choco vino esquinado H">
+                        <img src="gallery2.jpg" alt="Facial rejuvenecedor">
                         <div class="image-overlay">
-                            <h3 class="image-title">Delicias Gourmet</h3>
-                            <p class="image-description">Saborea nuestra selección de quesos y vinos premium.</p>
+                            <h3 class="image-title">Facial Rejuvenecedor</h3>
+                            <p class="image-description">Revitaliza tu piel con nuestro tratamiento facial de lujo.</p>
                         </div>
-                        <div class="more-icon">+</div>
                     </div>
                     <div class="gallery-item">
-                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/par.JPG" alt="Sillas choco vino esquinado H">
+                        <img src="gallery3.jpg" alt="Masaje deportivo">
                         <div class="image-overlay">
-                            <h3 class="image-title">Masaje en Pareja</h3>
-                            <p class="image-description">Comparte un momento de relajación con tu ser querido.</p>
+                            <h3 class="image-title">Masaje Deportivo</h3>
+                            <p class="image-description">Recupera tu cuerpo después de un entrenamiento intenso.</p>
                         </div>
-                        <div class="more-icon">+</div>
                     </div>
-                    <div class="gallery-item">
-                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/rosal.JPG" alt="Rosal">
-                        <div class="image-overlay">
-                            <h3 class="image-title">Toque Romántico</h3>
-                            <p class="image-description">Detalles que hacen la diferencia en tu experiencia.</p>
-                        </div>
-                        <div class="more-icon">+</div>
-                    </div>
+                    <!-- Agrega más elementos de galería según sea necesario -->
                 </div>
             </div>
         </section>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2023 Elite Massage. Todos los derechos reservados.</p>
-            <div class="social-media">
-                <a href="https://facebook.com/elitemassage" target="_blank" rel="noopener noreferrer">Facebook</a> |
-                <a href="https://instagram.com/elitemassage" target="_blank" rel="noopener noreferrer">Instagram</a> |
-                <a href="https://twitter.com/elitemassage" target="_blank" rel="noopener noreferrer">Twitter</a>
-            </div>
-        </div>
-    </footer>
-
     <div class="fixed-bar">
         <nav class="main-nav">
             <ul>
-                <li><a href="#servicios"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/lista.gif" alt="Icono Servicios" class="nav-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-icon.png';"><span class="nav-text">Masajes</span></a></li>
-                <li><a href="#paquetes"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/reg.gif" alt="Icono Paquetes" class="nav-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-icon.png';"><span class="nav-text">Paquetes</span></a></li>
-                <li><a href="#testimonios"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/coment.gif" alt="Icono Testimonios" class="nav-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-icon.png';"><span class="nav-text">Testimonios</span></a></li>
-                <li><a href="#galeria"><img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fotos.gif" alt="Icono Galería" class="nav-icon" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-icon.png';"><span class="nav-text">Galería</span></a></li>
+                <li><a href="#home"><img src="home-icon.png" alt="Inicio" class="nav-icon"><span class="nav-text">Inicio</span></a></li>
+                <li><a href="#services"><img src="services-icon.png" alt="Servicios" class="nav-icon"><span class="nav-text">Servicios</span></a></li>
+                <li><a href="#contact"><img src="contact-icon.png" alt="Contacto" class="nav-icon"><span class="nav-text">Contacto</span></a></li>
+                <li><a href="#about"><img src="about-icon.png" alt="Acerca de" class="nav-icon"><span class="nav-text">Acerca de</span></a></li>
             </ul>
         </nav>
     </div>
@@ -176,21 +174,21 @@
     <div id="popup" class="popup">
         <div class="popup-content">
             <span class="close">&times;</span>
-            <img id="popup-image" src="" alt="Imagen del servicio">
             <h2 id="popup-title"></h2>
+            <img id="popup-image" src="" alt="">
             <p id="popup-description"></p>
             <div class="popup-details">
                 <div class="popup-benefits">
-                    <img src="/ICONOS/benefits-icon.png" alt="Beneficios" class="benefits-icon">
+                    <img src="benefits-icon.png" alt="Beneficios" class="icon">
                     <span id="popup-benefits"></span>
                 </div>
                 <div class="popup-duration">
-                    <img src="/ICONOS/duration-icon.png" alt="Duración" class="duration-icon">
+                    <img src="duration-icon.png" alt="Duración" class="icon">
                     <span id="popup-duration"></span>
                 </div>
             </div>
-            <a href="#" id="whatsapp-button" class="whatsapp-button">
-                <img src="/ICONOS/whatsapp-icon.png" alt="WhatsApp">
+            <a href="#" class="whatsapp-button">
+                <img src="whatsapp-icon.png" alt="WhatsApp">
                 Reservar por WhatsApp
             </a>
         </div>
@@ -202,80 +200,21 @@
         <div id="modalDescription"></div>
     </div>
 
-    <template id="service-template">
-        <div class="service-item">
-            <div class="service-background"></div>
-            <div class="service-content">
-                <div class="service-header">
-                    <img class="service-icon" alt="Icono del servicio">
-                    <h3 class="service-title"></h3>
-                </div>
-                <p class="service-description"></p>
-                <div class="benefits-container">
-                    <img src="/ICONOS/benefits-icon.png" alt="Beneficios" class="benefits-icon">
-                    <span class="service-benefits"></span>
-                </div>
-                <div class="duration-container">
-                    <img src="/ICONOS/duration-icon.png" alt="Duración" class="duration-icon">
-                    <span class="service-duration"></span>
-                </div>
-                <div class="service-buttons">
-                    <button class="reserve-button">Reserva ahora</button>
-                </div>
+    <footer>
+        <div class="footer-content">
+            <div class="contact-info">
+                <p>Contáctanos: info@elitemassagemx.com</p>
+                <p>Teléfono: +52 1 55 1234 5678</p>
             </div>
-            <div class="more-icon">+</div>
+            <div class="social-media">
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+            </div>
         </div>
-    </template>
+        <p>&copy; 2024 Elite Massage MX. Todos los derechos reservados.</p>
+    </footer>
 
-    <template id="package-template">
-        <div class="package-item">
-            <div class="package-background"></div>
-            <div class="package-content">
-                <h3 class="package-title"></h3>
-                <p class="package-description"></p>
-                <div class="package-includes">
-                    <strong>Incluye:</strong> <span class="package-includes-list"></span>
-                </div>
-                <div class="package-duration">
-                    <img src="/ICONOS/duration-icon.png" alt="Duración" class="duration-icon">
-                    <span class="package-duration-text"></span>
-                </div>
-                <div class="package-benefits">
-                    <img src="/ICONOS/benefits-icon.png" alt="Beneficios" class="benefits-icon">
-                    <span class="package-benefits-list"></span>
-                </div>
-                <div class="package-buttons">
-                    <button class="reserve-button">Reservar</button>
-                </div>
-            </div>
-            <div class="more-icon">+</div>
-        </div>
-    </template>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    
-    <!-- Google Translate -->
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({pageLanguage: 'es', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    
-    <!-- GSAP y ScrollTrigger para animaciones -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
-    
-    <!-- Slick Carousel para la galería -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
-    
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Tu script personalizado -->
     <script src="script.js"></script>
 </body>
 </html>
