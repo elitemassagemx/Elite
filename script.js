@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleImageError(img) {
         console.warn(`Failed to load image: ${img.src}`);
         img.style.display = 'none';
-        img.src = `${BASE_URL}fallback-image.png`;
     }
 
     function buildImageUrl(iconPath) {
@@ -29,18 +28,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                return response.json();
+                return response.text();
             })
-            .then(data => {
-                console.log('JSON data loaded successfully');
-                services = data.services;
-                renderServices('individual');
-                renderPackages();
-                setupBenefitsNav('individual');
-                setupPackageNav();
+            .then(text => {
+                try {
+                    const cleanedText = text.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+                    const data = JSON.parse(cleanedText);
+                    console.log('JSON data loaded successfully:', data);
+                    services = data.services;
+                    renderServices('individual');
+                    renderPackages();
+                    setupFilters();
+                    setupServiceCategories();
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    console.error('Problematic JSON:', text);
+                    throw error;
+                }
             })
             .catch(error => {
-                console.error('Error loading the JSON file:', error);
+                console.error('Error loading or parsing the JSON file:', error);
                 const servicesList = getElement('services-list');
                 const packageList = getElement('package-list');
                 if (servicesList) servicesList.innerHTML = '<p>Error al cargar los servicios. Por favor, intente más tarde.</p>';
@@ -50,9 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderServices(category) {
         console.log(`Rendering services for category: ${category}`);
-        const servicesList = getElement('services-list');
-        const template = getElement('service-template');
-        if (!servicesList || !template) return;
+        const servicesList = document.getElementById('services-list');
+        const template = document.getElementById('service-template');
+        if (!servicesList || !template) {
+            console.error('services-list or service-template not found');
+            return;
+        }
 
         servicesList.innerHTML = '';
 
@@ -62,37 +72,57 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        services[category].forEach(service => {
+        services[category].forEach((service, index) => {
+            console.log(`Rendering service ${index + 1}:`, service);
             const serviceElement = template.content.cloneNode(true);
             
-            serviceElement.querySelector('.service-title').textContent = service.title;
+            const titleElement = serviceElement.querySelector('.service-title');
+            if (titleElement) titleElement.textContent = service.title || 'Sin título';
             
             const serviceIcon = serviceElement.querySelector('.service-icon');
-            serviceIcon.src = buildImageUrl(service.icon);
-            serviceIcon.onerror = () => handleImageError(serviceIcon);
+            if (serviceIcon && service.icon) {
+                serviceIcon.src = buildImageUrl(service.icon);
+                serviceIcon.onerror = () => handleImageError(serviceIcon);
+            }
             
-            serviceElement.querySelector('.service-description').textContent = service.description;
+            const descriptionElement = serviceElement.querySelector('.service-description');
+            if (descriptionElement) descriptionElement.textContent = service.description || 'Sin descripción';
             
             const benefitsIcon = serviceElement.querySelector('.benefits-icon');
-            benefitsIcon.src = buildImageUrl(Array.isArray(service.benefitsIcons) ? service.benefitsIcons[0] : service.benefitsIcons);
-            benefitsIcon.onerror = () => handleImageError(benefitsIcon);
+            if (benefitsIcon && service.benefitsIcons) {
+                benefitsIcon.src = buildImageUrl(Array.isArray(service.benefitsIcons) ? service.benefitsIcons[0] : service.benefitsIcons);
+                benefitsIcon.onerror = () => handleImageError(benefitsIcon);
+            }
             
-            serviceElement.querySelector('.service-benefits').textContent = service.benefits.join(', ');
+            const benefitsElement = serviceElement.querySelector('.service-benefits');
+            if (benefitsElement) benefitsElement.textContent = Array.isArray(service.benefits) ? service.benefits.join(', ') : 'No especificado';
             
             const durationIcon = serviceElement.querySelector('.duration-icon');
-            durationIcon.src = buildImageUrl(service.durationIcon);
-            durationIcon.onerror = () => handleImageError(durationIcon);
+            if (durationIcon && service.durationIcon) {
+                durationIcon.src = buildImageUrl(service.durationIcon);
+                durationIcon.onerror = () => handleImageError(durationIcon);
+            }
             
-            serviceElement.querySelector('.service-duration').textContent = service.duration;
+            const durationElement = serviceElement.querySelector('.service-duration');
+            if (durationElement) durationElement.textContent = service.duration || 'Duración no especificada';
 
             const reserveButton = serviceElement.querySelector('.reserve-button');
-            reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', service.title));
+            if (reserveButton) {
+                reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', service.title));
+            }
 
-            const infoButton = serviceElement.querySelector('.info-button');
-            infoButton.addEventListener('click', () => showPopup(service));
+            const moreIcon = serviceElement.querySelector('.more-icon');
+            if (moreIcon) {
+                moreIcon.addEventListener('click', () => showPopup(service));
+            }
+
+            const serviceBackground = serviceElement.querySelector('.service-background');
+            if (serviceBackground && service.backgroundImage) {
+                serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
+            }
 
             const serviceItem = serviceElement.querySelector('.service-item');
-            if (Array.isArray(service.benefits)) {
+            if (serviceItem && Array.isArray(service.benefits)) {
                 service.benefits.forEach(benefit => {
                     serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
                 });
@@ -119,20 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        services.paquetes.forEach(pkg => {
+        services.paquetes.forEach((pkg, index) => {
+            console.log(`Rendering package ${index + 1}:`, pkg);
             const packageElement = template.content.cloneNode(true);
             
-            packageElement.querySelector('.package-title').textContent = pkg.title;
-            packageElement.querySelector('.package-description').textContent = pkg.description;
-            packageElement.querySelector('.package-includes-list').textContent = pkg.includes.join(', ');
-            packageElement.querySelector('.package-duration-text').textContent = pkg.duration;
-            packageElement.querySelector('.package-benefits-list').textContent = pkg.benefits.join(', ');
+            packageElement.querySelector('.package-title').textContent = pkg.title || 'Sin título';
+            packageElement.querySelector('.package-description').textContent = pkg.description || 'Sin descripción';
+            packageElement.querySelector('.package-includes-list').textContent = Array.isArray(pkg.includes) ? pkg.includes.join(', ') : 'No especificado';
+            packageElement.querySelector('.package-duration-text').textContent = pkg.duration || 'Duración no especificada';
+            packageElement.querySelector('.package-benefits-list').textContent = Array.isArray(pkg.benefits) ? pkg.benefits.join(', ') : 'No especificado';
 
             const reserveButton = packageElement.querySelector('.reserve-button');
             reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', pkg.title));
 
-            const infoButton = packageElement.querySelector('.info-button');
-            infoButton.addEventListener('click', () => showPopup(pkg));
+            const moreIcon = packageElement.querySelector('.more-icon');
+            moreIcon.addEventListener('click', () => showPopup(pkg));
 
             const packageBackground = packageElement.querySelector('.package-background');
             if (pkg.backgroundImage) {
@@ -155,13 +186,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const popupTitle = getElement('popup-title');
         const popupImage = getElement('popup-image');
         const popupDescription = getElement('popup-description');
-        if (!popup || !popupTitle || !popupImage || !popupDescription) return;
+        const popupBenefits = getElement('popup-benefits');
+        const popupDuration = getElement('popup-duration');
+        if (!popup || !popupTitle || !popupImage || !popupDescription || !popupBenefits || !popupDuration) return;
 
         popupTitle.textContent = data.title || '';
         popupImage.src = buildImageUrl(data.popupImage || data.image);
         popupImage.alt = data.title || '';
         popupImage.onerror = () => handleImageError(popupImage);
         popupDescription.textContent = data.popupDescription || data.description || '';
+        popupBenefits.textContent = Array.isArray(data.benefits) ? data.benefits.join(', ') : data.benefits || '';
+        popupDuration.textContent = data.duration || '';
 
         popup.style.display = 'block';
     }
@@ -210,14 +245,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function setupCategorySelector() {
-        document.querySelectorAll('.choice-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                console.log(`Choice chip clicked: ${chip.dataset.category}`);
-                document.querySelectorAll('.choice-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                renderServices(chip.dataset.category);
-                setupBenefitsNav(chip.dataset.category);
+    function setupServiceCategories() {
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.dataset.category;
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                renderServices(category);
+                setupBenefitsNav(category);
             });
         });
     }
@@ -258,70 +294,9 @@ document.addEventListener('DOMContentLoaded', () => {
         setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
     }
 
-    function setupPackageNav() {
-        const packageNav = document.querySelector('.package-nav');
-        if (!packageNav) return;
-
-        packageNav.innerHTML = '';
-        const packageTypes = new Set();
-
-        services.paquetes.forEach(pkg => {
-            if (pkg.type) {
-                packageTypes.add(pkg.type);
-            }
-        });
-
-        const allButton = document.createElement('button');
-        allButton.classList.add('package-btn', 'active');
-        allButton.dataset.filter = 'all';
-        allButton.innerHTML = `
-            <img src="${BASE_URL}todos-paquetes.png" alt="Todos los Paquetes">
-            <span>Todos los Paquetes</span>
-        `;
-        packageNav.appendChild(allButton);
-
-        packageTypes.forEach(type => {
-            const button = document.createElement('button');
-            button.classList.add('package-btn');
-            button.dataset.filter = type.toLowerCase().replace(/\s+/g, '-');
-            button.innerHTML = `
-                <img src="${BASE_URL}${type.toLowerCase().replace(/\s+/g, '-')}.png" alt="${type}">
-                <span>${type}</span>
-            `;
-            packageNav.appendChild(button);
-        });
-
-        setupFilterButtons('.package-nav', '#package-list', '.package-item');
-    }
-
-    function setupFilterButtons(navSelector, listSelector, itemSelector) {
-        const navElement = document.querySelector(navSelector);
-        const listElement = document.querySelector(listSelector);
-
-        if (!navElement || !listElement) return;
-
-        navElement.addEventListener('click', (event) => {
-            if (event.target.matches('button') || event.target.closest('button')) {
-                const button = event.target.matches('button') ? event.target : event.target.closest('button');
-                const filter = button.dataset.filter;
-                
-                navElement.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                listElement.querySelectorAll(itemSelector).forEach(item => {
-                    if (filter === 'all' || item.classList.contains(filter)) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            }
-        });
-    }
-
     function setupPopup() {
         const popup = getElement('popup');
-        const closeButton = popup.querySelector('.close');
+        const closeButton = document.querySelector('.close');
         if (!popup || !closeButton) return;
 
         closeButton.addEventListener('click', () => {
@@ -343,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        console.log('Setting up gallery animations');
+        console.log('GSAP and ScrollTrigger are loaded');
         gsap.registerPlugin(ScrollTrigger);
 
         const gallery = document.querySelector('.gallery-container');
@@ -352,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        console.log('Gallery container found');
         const images = gsap.utils.toArray('.gallery-container img');
         
         ScrollTrigger.create({
@@ -392,148 +368,72 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 );
             });
-
-}
+        }
 
         console.log(`Found ${images.length} images in the gallery`);
     }
 
-    function setupGalleryModal() {
-        const modal = document.getElementById('imageModal');
-        const modalImg = document.getElementById('modalImage');
-        const modalDescription = document.getElementById('modalDescription');
+function setupGalleryModal() {
+        const modal = getElement('imageModal');
+        const modalImg = getElement('modalImage');
+        const modalDescription = getElement('modalDescription');
         const closeBtn = modal.querySelector('.close');
-
-        if (!modal || !modalImg || !modalDescription || !closeBtn) {
-            console.error('Gallery modal elements not found');
-            return;
-        }
 
         document.querySelectorAll('.gallery-item').forEach(item => {
             item.addEventListener('click', function() {
-                const img = this.querySelector('img');
-                const description = this.querySelector('.image-description');
-                if (img && description) {
-                    modal.style.display = "block";
-                    modalImg.src = img.src;
-                    modalDescription.innerHTML = description.innerHTML;
-                }
+                modal.style.display = "block";
+                modalImg.src = this.querySelector('img').src;
+                modalDescription.innerHTML = this.querySelector('.image-description').innerHTML;
             });
         });
-        
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = "none";
-        });
 
-        window.addEventListener('click', function(event) {
-            if (event.target === modal) {
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
                 modal.style.display = "none";
             }
+        }
+    }
+
+    function setupFilters() {
+        setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
+        setupFilterButtons('.package-nav', '#package-list', '.package-item');
+    }
+
+    function setupFilterButtons(navSelector, listSelector, itemSelector) {
+        const filterButtons = document.querySelectorAll(`${navSelector} button`);
+        const items = document.querySelectorAll(itemSelector);
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.getAttribute('data-filter');
+                
+                // Actualizar botones activos
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Filtrar elementos
+                items.forEach(item => {
+                    if (filter === 'all' || item.classList.contains(filter)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
         });
     }
 
-    function setupDarkModeToggle() {
-        const colorModeCheckbox = document.getElementById('color_mode');
-        if (!colorModeCheckbox) {
-            console.error('Dark mode toggle not found');
-            return;
-        }
-
-        colorModeCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-preview');
-                document.body.classList.remove('white-preview');
-            } else {
-                document.body.classList.add('white-preview');
-                document.body.classList.remove('dark-preview');
-            }
-            console.log(`Dark mode ${this.checked ? 'enabled' : 'disabled'}`);
-        });
+    function init() {
+        loadJSONData();
+        setupLanguageSelector();
+        setupPopup();
+        setupGalleryAnimations();
+        setupGalleryModal();
     }
 
-    function setupStickyHeader() {
-        const header = document.getElementById('sticky-header');
-        const fixedBar = document.querySelector('.fixed-bar');
-        if (!header || !fixedBar) {
-            console.error('Sticky header or fixed bar not found');
-            return;
-        }
-
-        let lastScrollTop = 0;
-        const scrollThreshold = 5; // Minimum amount of pixels scrolled to trigger the effect
-
-        window.addEventListener('scroll', () => {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            if (Math.abs(scrollTop - lastScrollTop) <= scrollThreshold) return;
-
-            if (scrollTop > lastScrollTop) {
-                // Scrolling down
-                header.style.top = '-100px';
-                fixedBar.style.bottom = '0';
-            } else {
-                // Scrolling up
-                header.style.top = '0';
-                fixedBar.style.bottom = '-100px';
-            }
-            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-        }, { passive: true });
-    }
-
-function setupDarkModeToggle() {
-    const colorModeCheckbox = document.getElementById('color_mode');
-    if (!colorModeCheckbox) {
-        console.error('Dark mode toggle not found');
-        return;
-    }
-
-    colorModeCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            document.body.classList.add('dark-preview');
-            document.body.classList.remove('white-preview');
-        } else {
-            document.body.classList.add('white-preview');
-            document.body.classList.remove('dark-preview');
-        }
-        console.log(`Dark mode ${this.checked ? 'enabled' : 'disabled'}`);
-    });
-}
-
-function setupStickyHeader() {
-    const header = document.getElementById('sticky-header');
-    const fixedBar = document.querySelector('.fixed-bar');
-    if (!header || !fixedBar) {
-        console.error('Sticky header or fixed bar not found');
-        return;
-    }
-
-    let lastScrollTop = 0;
-    const scrollThreshold = 5;
-
-    window.addEventListener('scroll', () => {
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        if (Math.abs(scrollTop - lastScrollTop) <= scrollThreshold) return;
-
-        if (scrollTop > lastScrollTop) {
-            // Scrolling down
-            header.style.top = '-100px';
-            fixedBar.style.bottom = '0';
-        } else {
-            // Scrolling up
-            header.style.top = '0';
-            fixedBar.style.bottom = '-100px';
-        }
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-    }, { passive: true });
-}
-
-    
-function init() {
-    loadJSONData();
-    setupLanguageSelector();
-    setupPopup();
-    setupGalleryAnimations();
-    setupGalleryModal();
-    setupDarkModeToggle();  // Nueva línea
-    setupStickyHeader();    // Nueva línea
-    console.log('Initialization complete');
-}
+    init();
+});
