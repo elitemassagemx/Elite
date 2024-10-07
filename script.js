@@ -479,17 +479,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
     }
 
-    function init() {
-        loadJSONData();
-        setupLanguageSelector();
-        setupCategorySelector();
-        setupPopup();
-        setupGalleryAnimations();
-        setupGalleryModal();
-        setupDarkModeToggle();
-        setupStickyHeader();
-        console.log('Initialization complete');
+function setupDarkModeToggle() {
+    const colorModeCheckbox = document.getElementById('color_mode');
+    if (!colorModeCheckbox) {
+        console.error('Dark mode toggle not found');
+        return;
     }
 
-    init();
-});
+    colorModeCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            document.body.classList.add('dark-preview');
+            document.body.classList.remove('white-preview');
+        } else {
+            document.body.classList.add('white-preview');
+            document.body.classList.remove('dark-preview');
+        }
+        console.log(`Dark mode ${this.checked ? 'enabled' : 'disabled'}`);
+    });
+}
+
+function setupStickyHeader() {
+    const header = document.getElementById('sticky-header');
+    const fixedBar = document.querySelector('.fixed-bar');
+    if (!header || !fixedBar) {
+        console.error('Sticky header or fixed bar not found');
+        return;
+    }
+
+    let lastScrollTop = 0;
+    const scrollThreshold = 5;
+
+    window.addEventListener('scroll', () => {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (Math.abs(scrollTop - lastScrollTop) <= scrollThreshold) return;
+
+        if (scrollTop > lastScrollTop) {
+            // Scrolling down
+            header.style.top = '-100px';
+            fixedBar.style.bottom = '0';
+        } else {
+            // Scrolling up
+            header.style.top = '0';
+            fixedBar.style.bottom = '-100px';
+        }
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }, { passive: true });
+}
+
+    
+function init() {
+    loadJSONData();
+    setupLanguageSelector();
+    setupPopup();
+    setupGalleryAnimations();
+    setupGalleryModal();
+    setupDarkModeToggle();  // Nueva línea
+    setupStickyHeader();    // Nueva línea
+    console.log('Initialization complete');
+}
