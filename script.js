@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        console.log('GSAP and ScrollTrigger are loaded');
+        console.log('Setting up gallery animations');
         gsap.registerPlugin(ScrollTrigger);
 
         const gallery = document.querySelector('.gallery-container');
@@ -352,7 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        console.log('Gallery container found');
         const images = gsap.utils.toArray('.gallery-container img');
         
         ScrollTrigger.create({
@@ -390,10 +389,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         ease: "power2.out",
                         delay: index * 0.1,
                         onStart: () => console.log(`Image ${index + 1} animation started`)
-                        }
+                    }
                 );
             });
-        }
+
+}
 
         console.log(`Found ${images.length} images in the gallery`);
     }
@@ -404,11 +404,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const modalDescription = document.getElementById('modalDescription');
         const closeBtn = modal.querySelector('.close');
 
+        if (!modal || !modalImg || !modalDescription || !closeBtn) {
+            console.error('Gallery modal elements not found');
+            return;
+        }
+
         document.querySelectorAll('.gallery-item').forEach(item => {
             item.addEventListener('click', function() {
-                modal.style.display = "block";
-                modalImg.src = this.querySelector('img').src;
-                modalDescription.innerHTML = this.querySelector('.image-description').innerHTML;
+                const img = this.querySelector('img');
+                const description = this.querySelector('.image-description');
+                if (img && description) {
+                    modal.style.display = "block";
+                    modalImg.src = img.src;
+                    modalDescription.innerHTML = description.innerHTML;
+                }
             });
         });
         
@@ -425,7 +434,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupDarkModeToggle() {
         const colorModeCheckbox = document.getElementById('color_mode');
-        if (!colorModeCheckbox) return;
+        if (!colorModeCheckbox) {
+            console.error('Dark mode toggle not found');
+            return;
+        }
 
         colorModeCheckbox.addEventListener('change', function() {
             if (this.checked) {
@@ -435,18 +447,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.classList.add('white-preview');
                 document.body.classList.remove('dark-preview');
             }
+            console.log(`Dark mode ${this.checked ? 'enabled' : 'disabled'}`);
         });
     }
 
     function setupStickyHeader() {
         const header = document.getElementById('sticky-header');
         const fixedBar = document.querySelector('.fixed-bar');
-        if (!header || !fixedBar) return;
+        if (!header || !fixedBar) {
+            console.error('Sticky header or fixed bar not found');
+            return;
+        }
 
         let lastScrollTop = 0;
+        const scrollThreshold = 5; // Minimum amount of pixels scrolled to trigger the effect
 
         window.addEventListener('scroll', () => {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (Math.abs(scrollTop - lastScrollTop) <= scrollThreshold) return;
+
             if (scrollTop > lastScrollTop) {
                 // Scrolling down
                 header.style.top = '-100px';
@@ -457,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fixedBar.style.bottom = '-100px';
             }
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-        }, false);
+        }, { passive: true });
     }
 
     function init() {
@@ -469,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupGalleryModal();
         setupDarkModeToggle();
         setupStickyHeader();
+        console.log('Initialization complete');
     }
 
     init();
