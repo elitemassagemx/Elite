@@ -1,8 +1,34 @@
+const BASE_URL = "https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/";
+let services = {};
+let currentPopupIndex = 0;
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded');
 
-    const BASE_URL = "https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/";
-    let services = {};
+    // Elementos del DOM
+    const verMasBtn = document.getElementById('ver-mas-galeria');
+    const galleryGrid = document.querySelector('.gallery-grid');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+    const translateIcon = document.getElementById('translate-icon');
+    const languageOptions = document.querySelector('.language-options');
+    const header = document.getElementById('sticky-header');
+    let isExpanded = false;
+    let lastScrollTop = 0;
+
+    // Inicializaciones
+    init();
+
+    function init() {
+        loadJSONData();
+        setupLanguageSelector();
+        setupPopup();
+        setupGalleryAnimations();
+        setupGalleryModal();
+        setupDarkMode();
+        setupScrollHandling();
+        initGallery();
+    }
 
     function handleImageError(img) {
         console.warn(`Failed to load image: ${img.src}`);
@@ -32,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(text => {
                 try {
+                    text = text.replace(/\$\{BASE_URL\}/g, BASE_URL);
                     const cleanedText = text.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
                     const data = JSON.parse(cleanedText);
                     console.log('JSON data loaded successfully:', data);
@@ -40,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderPackages();
                     setupFilters();
                     setupServiceCategories();
+                    setupGallery();
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
                     console.error('Problematic JSON:', text);
@@ -108,24 +136,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const reserveButton = serviceElement.querySelector('.reserve-button');
             if (reserveButton) {
-                reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', service.title));
+                reserveButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sendWhatsAppMessage('Reservar', service.title);
+                });
             }
 
+            const serviceItem = serviceElement.querySelector('.service-item');
             const moreIcon = serviceElement.querySelector('.more-icon');
-            if (moreIcon) {
-                moreIcon.addEventListener('click', () => showPopup(service));
+            if (serviceItem && moreIcon) {
+                serviceItem.addEventListener('click', () => showPopup(service, index));
+                moreIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showPopup(service, index);
+                });
+                if (Array.isArray(service.benefits)) {
+                    service.benefits.forEach(benefit => {
+                        serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
+                    });
+                }
             }
 
             const serviceBackground = serviceElement.querySelector('.service-background');
             if (serviceBackground && service.backgroundImage) {
                 serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
-            }
-
-            const serviceItem = serviceElement.querySelector('.service-item');
-            if (serviceItem && Array.isArray(service.benefits)) {
-                service.benefits.forEach(benefit => {
-                    serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
-                });
             }
 
             servicesList.appendChild(serviceElement);
@@ -148,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             packageList.innerHTML = '<p>Error al cargar los paquetes. Por favor, intente más tarde.</p>';
             return;
         }
-
+        
         services.paquetes.forEach((pkg, index) => {
             console.log(`Rendering package ${index + 1}:`, pkg);
             const packageElement = template.content.cloneNode(true);
@@ -160,17 +194,26 @@ document.addEventListener('DOMContentLoaded', () => {
             packageElement.querySelector('.package-benefits-list').textContent = Array.isArray(pkg.benefits) ? pkg.benefits.join(', ') : 'No especificado';
 
             const reserveButton = packageElement.querySelector('.reserve-button');
-            reserveButton.addEventListener('click', () => sendWhatsAppMessage('Reservar', pkg.title));
+            reserveButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sendWhatsAppMessage('Reservar', pkg.title);
+            });
 
+            const packageItem = packageElement.querySelector('.package-item');
             const moreIcon = packageElement.querySelector('.more-icon');
-            moreIcon.addEventListener('click', () => showPopup(pkg));
+            if (packageItem && moreIcon) {
+                packageItem.addEventListener('click', () => showPopup(pkg, index, true));
+                moreIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showPopup(pkg, index, true);
+                });
+            }
 
             const packageBackground = packageElement.querySelector('.package-background');
             if (pkg.backgroundImage) {
                 packageBackground.style.backgroundImage = `url(${buildImageUrl(pkg.backgroundImage)})`;
             }
 
-            const packageItem = packageElement.querySelector('.package-item');
             if (pkg.type) {
                 packageItem.classList.add(pkg.type.toLowerCase().replace(/\s+/g, '-'));
             }
@@ -180,15 +223,19 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Rendered ${services.paquetes.length} packages`);
     }
 
-    function showPopup(data) {
+    function showPopup(data, index, isPackage = false) {
         console.log('Showing popup for:', data.title);
         const popup = getElement('popup');
+        const popupContent = popup.querySelector('.popup-content');
         const popupTitle = getElement('popup-title');
         const popupImage = getElement('popup-image');
         const popupDescription = getElement('popup-description');
         const popupBenefits = getElement('popup-benefits');
         const popupDuration = getElement('popup-duration');
-        if (!popup || !popupTitle || !popupImage || !popupDescription || !popupBenefits || !popupDuration) return;
+        const whatsappButton = getElement('whatsapp-button');
+        if (!popup || !popupContent || !popupTitle || !popupImage || !popupDescription || !popupBenefits || !popupDuration || !whatsappButton) return;
+
+        currentPopupIndex = index;
 
         popupTitle.textContent = data.title || '';
         popupImage.src = buildImageUrl(data.popupImage || data.image);
@@ -198,7 +245,49 @@ document.addEventListener('DOMContentLoaded', () => {
         popupBenefits.textContent = Array.isArray(data.benefits) ? data.benefits.join(', ') : data.benefits || '';
         popupDuration.textContent = data.duration || '';
 
+        popupContent.style.backgroundImage = `url(${buildImageUrl(data.popupImage || data.image)})`;
+        popupContent.style.backgroundSize = 'cover';
+        popupContent.style.backgroundPosition = 'center';
+
+        whatsappButton.onclick = () => sendWhatsAppMessage('Reservar', data.title);
+
+        setupPopupCarousel(isPackage);
+
         popup.style.display = 'block';
+    }
+
+    function setupPopupCarousel(isPackage) {
+        const popupContent = document.querySelector('.popup-content');
+        let startX, currentX;
+
+        popupContent.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        popupContent.addEventListener('touchmove', (e) => {
+            if (!startX) return;
+            currentX = e.touches[0].clientX;
+            const diff = startX - currentX;
+            if (Math.abs(diff) > 50) {
+                navigatePopup(diff > 0 ? 1 : -1, isPackage);
+                startX = null;
+            }
+        });
+
+        popupContent.addEventListener('touchend', () => {
+            startX = null;
+        });
+    }
+
+    function navigatePopup(direction, isPackage) {
+        const items = isPackage ? services.paquetes : services[getCurrentCategory()];
+        currentPopupIndex = (currentPopupIndex + direction + items.length) % items.length;
+        showPopup(items[currentPopupIndex], currentPopupIndex, isPackage);
+    }
+
+    function getCurrentCategory() {
+        const checkedRadio = document.querySelector('.service-category-toggle input[type="radio"]:checked');
+        return checkedRadio ? checkedRadio.value : 'individual';
     }
 
     function sendWhatsAppMessage(action, serviceTitle) {
@@ -246,16 +335,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupServiceCategories() {
-        const categoryButtons = document.querySelectorAll('.category-btn');
-        categoryButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const category = button.dataset.category;
-                categoryButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
+        const categoryInputs = document.querySelectorAll('.service-category-toggle input[type="radio"]');
+        categoryInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                const category = input.value;
                 renderServices(category);
                 setupBenefitsNav(category);
+                setupPackageNav();
             });
         });
+        setupBenefitsNav('individual');
+        setupPackageNav();
     }
 
     function setupBenefitsNav(category) {
@@ -265,13 +355,15 @@ document.addEventListener('DOMContentLoaded', () => {
         benefitsNav.innerHTML = '';
         const allBenefits = new Set();
 
-        services[category].forEach(service => {
-            if (Array.isArray(service.benefits)) {
-                service.benefits.forEach(benefit => allBenefits.add(benefit));
-            }
-        });
+        if (services[category]) {
+            services[category].forEach(service => {
+                if (Array.isArray(service.benefits)) {
+                    service.benefits.forEach(benefit => allBenefits.add(benefit));
+                }
+            });
+        }
 
-        const allButton = document.createElement('button');
+const allButton = document.createElement('button');
         allButton.classList.add('benefit-btn', 'active');
         allButton.dataset.filter = 'all';
         allButton.innerHTML = `
@@ -294,6 +386,42 @@ document.addEventListener('DOMContentLoaded', () => {
         setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
     }
 
+    function setupPackageNav() {
+        const packageNav = document.querySelector('.package-nav');
+        if (!packageNav) return;
+
+        packageNav.innerHTML = '';
+        const allPackages = new Set();
+
+        if (services.paquetes) {
+            services.paquetes.forEach(pkg => {
+                allPackages.add(pkg.title);
+            });
+        }
+
+        const allButton = document.createElement('button');
+        allButton.classList.add('package-btn', 'active');
+        allButton.dataset.filter = 'all';
+        allButton.innerHTML = `
+            <img src="${BASE_URL}todos.png" alt="Todos">
+            <span>Todos</span>
+        `;
+        packageNav.appendChild(allButton);
+
+        allPackages.forEach(packageTitle => {
+            const button = document.createElement('button');
+            button.classList.add('package-btn');
+            button.dataset.filter = packageTitle.toLowerCase().replace(/\s+/g, '-');
+            button.innerHTML = `
+                <img src="${BASE_URL}${packageTitle.toLowerCase().replace(/\s+/g, '-')}-icon.png" alt="${packageTitle}">
+                <span>${packageTitle}</span>
+            `;
+            packageNav.appendChild(button);
+        });
+
+        setupFilterButtons('.package-nav', '#package-list', '.package-item');
+    }
+
     function setupPopup() {
         const popup = getElement('popup');
         const closeButton = document.querySelector('.close');
@@ -309,6 +437,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Closing popup (clicked outside)');
                 popup.style.display = 'none';
             }
+        });
+    }
+
+    function setupGallery() {
+        const galleryCarousel = document.querySelector('.gallery-carousel');
+        const galleryGrid = document.querySelector('.gallery-grid');
+        const verMasButton = getElement('ver-mas-galeria');
+
+        if (!galleryCarousel || !galleryGrid || !verMasButton) {
+            console.error('Gallery elements not found');
+            return;
+        }
+
+        // Aquí deberías cargar las imágenes de la galería desde tu fuente de datos
+        const galleryImages = [
+            { src: 'imagen1.jpg', title: 'Título 1', description: 'Descripción 1' },
+            { src: 'imagen2.jpg', title: 'Título 2', description: 'Descripción 2' },
+            // ... más imágenes
+        ];
+
+        // Configurar el carrusel
+        galleryImages.forEach(image => {
+            const img = document.createElement('img');
+            img.src = buildImageUrl(image.src);
+            img.alt = image.title;
+            galleryCarousel.appendChild(img);
+        });
+
+        // Configurar la cuadrícula
+        galleryImages.forEach(image => {
+            const galleryItem = document.createElement('div');
+            galleryItem.classList.add('gallery-item');
+            galleryItem.innerHTML = `
+                <img src="${buildImageUrl(image.src)}" alt="${image.title}">
+                <div class="image-overlay">
+                    <h3 class="image-title">${image.title}</h3>
+                    <p class="image-description">${image.description}</p>
+                </div>
+            `;
+            galleryGrid.appendChild(galleryItem);
+        });
+
+        verMasButton.addEventListener('click', () => {
+            galleryGrid.style.display = galleryGrid.style.display === 'none' ? 'grid' : 'none';
+            verMasButton.textContent = galleryGrid.style.display === 'none' ? 'Ver más' : 'Ver menos';
         });
     }
 
@@ -373,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Found ${images.length} images in the gallery`);
     }
 
-function setupGalleryModal() {
+    function setupGalleryModal() {
         const modal = getElement('imageModal');
         const modalImg = getElement('modalImage');
         const modalDescription = getElement('modalDescription');
@@ -427,13 +600,44 @@ function setupGalleryModal() {
         });
     }
 
-    function init() {
-        loadJSONData();
-        setupLanguageSelector();
-        setupPopup();
-        setupGalleryAnimations();
-        setupGalleryModal();
+    function setupDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                body.classList.add('dark-mode');
+                body.classList.remove('light-mode');
+            } else {
+                body.classList.add('light-mode');
+                body.classList.remove('dark-mode');
+            }
+        });
     }
 
-    init();
+    function setupScrollHandling() {
+        const header = document.querySelector('.header-controls');
+        let lastScrollTop = 0;
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > lastScrollTop) {
+                // Scrolling down
+                header.style.top = '-50px';
+            } else {
+                // Scrolling up
+                header.style.top = '10px';
+            }
+
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
+    }
+
+    // Manejo de errores de carga de imágenes
+    document.querySelectorAll('img').forEach(img => {
+        img.addEventListener('error', function() {
+            this.src = 'https://raw.githubusercontent.com/elitemassagemx/Home/main/ICONOS/fallback-image.png';
+        });
+    });
 });
