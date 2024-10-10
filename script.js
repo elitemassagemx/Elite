@@ -8,10 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elementos del DOM
     const verMasBtn = document.getElementById('ver-mas-galeria');
     const galleryGrid = document.querySelector('.gallery-grid');
-    const darkModeToggle = document.getElementById('darkModeToggle');
     const body = document.body;
-    const translateIcon = document.getElementById('translate-icon');
-    const languageOptions = document.querySelector('.language-options');
     const header = document.getElementById('sticky-header');
     let isExpanded = false;
     let lastScrollTop = 0;
@@ -21,11 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function init() {
         loadJSONData();
-        setupLanguageSelector();
         setupPopup();
         setupGalleryAnimations();
         setupGalleryModal();
-        setupDarkMode();
         setupScrollHandling();
         initGallery();
     }
@@ -116,10 +111,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const descriptionElement = serviceElement.querySelector('.service-description');
             if (descriptionElement) descriptionElement.textContent = service.description || 'Sin descripción';
             
-            const benefitsIcon = serviceElement.querySelector('.benefits-icon');
-            if (benefitsIcon && service.benefitsIcons) {
-                benefitsIcon.src = buildImageUrl(Array.isArray(service.benefitsIcons) ? service.benefitsIcons[0] : service.benefitsIcons);
-                benefitsIcon.onerror = () => handleImageError(benefitsIcon);
+            const benefitsContainer = serviceElement.querySelector('.benefits-container');
+            if (benefitsContainer && Array.isArray(service.benefitsIcons)) {
+                const benefitsIconsContainer = document.createElement('div');
+                benefitsIconsContainer.classList.add('benefits-icons');
+                service.benefitsIcons.forEach(iconUrl => {
+                    const img = document.createElement('img');
+                    img.src = buildImageUrl(iconUrl);
+                    img.alt = 'Benefit icon';
+                    img.classList.add('benefit-icon');
+                    img.style.width = '24px';
+                    img.style.height = '24px';
+                    img.onerror = () => handleImageError(img);
+                    benefitsIconsContainer.appendChild(img);
+                });
+                benefitsContainer.insertBefore(benefitsIconsContainer, benefitsContainer.firstChild);
             }
             
             const benefitsElement = serviceElement.querySelector('.service-benefits');
@@ -245,9 +251,26 @@ document.addEventListener('DOMContentLoaded', () => {
         popupBenefits.textContent = Array.isArray(data.benefits) ? data.benefits.join(', ') : data.benefits || '';
         popupDuration.textContent = data.duration || '';
 
-        popupContent.style.backgroundImage = `url(${buildImageUrl(data.popupImage || data.image)})`;
-        popupContent.style.backgroundSize = 'cover';
-        popupContent.style.backgroundPosition = 'center';
+        // Mostrar iconos de beneficios en el popup
+        const popupBenefitsIcons = popup.querySelector('.popup-benefits-icons') || document.createElement('div');
+        popupBenefitsIcons.className = 'popup-benefits-icons';
+        popupBenefitsIcons.innerHTML = '';
+        if (Array.isArray(data.benefitsIcons)) {
+            data.benefitsIcons.forEach(iconUrl => {
+                const img = document.createElement('img');
+                img.src = buildImageUrl(iconUrl);
+                img.alt = 'Benefit icon';
+                img.classList.add('popup-benefit-icon');
+                img.style.width = '24px';
+                img.style.height = '24px';
+                img.onerror = () => handleImageError(img);
+                popupBenefitsIcons.appendChild(img);
+            });
+        }
+        const popupDetails = popup.querySelector('.popup-details');
+        if (popupDetails) {
+            popupDetails.insertBefore(popupBenefitsIcons, popupDetails.firstChild);
+        }
 
         whatsappButton.onclick = () => sendWhatsAppMessage('Reservar', data.title);
 
@@ -297,43 +320,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(url, '_blank');
     }
 
-    function changeLanguage(lang) {
-        console.log(`Changing language to: ${lang}`);
-        var selectField = document.querySelector('.goog-te-combo');
-        if (selectField) {
-            selectField.value = lang;
-            selectField.dispatchEvent(new Event('change'));
-        } else {
-            console.error('Google Translate dropdown not found');
-        }
-    }
-
-    function setupLanguageSelector() {
-        const translateIcon = getElement('translate-icon');
-        const languageOptions = document.querySelector('.language-options');
-        if (!translateIcon || !languageOptions) return;
-
-        translateIcon.addEventListener('click', () => {
-            console.log('Translate icon clicked');
-            languageOptions.style.display = languageOptions.style.display === 'block' ? 'none' : 'block';
-        });
-
-        document.querySelectorAll('.lang-option').forEach(option => {
-            option.addEventListener('click', (event) => {
-                const lang = event.currentTarget.dataset.lang;
-                console.log(`Language option clicked: ${lang}`);
-                changeLanguage(lang);
-                languageOptions.style.display = 'none';
-            });
-        });
-
-        document.addEventListener('click', (event) => {
-            if (!translateIcon.contains(event.target) && !languageOptions.contains(event.target)) {
-                languageOptions.style.display = 'none';
-            }
-        });
-    }
-
     function setupServiceCategories() {
         const categoryInputs = document.querySelectorAll('.service-category-toggle input[type="radio"]');
         categoryInputs.forEach(input => {
@@ -354,20 +340,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         benefitsNav.innerHTML = '';
         const allBenefits = new Set();
+        const benefitIcons = new Map();
 
         if (services[category]) {
             services[category].forEach(service => {
-                if (Array.isArray(service.benefits)) {
-                    service.benefits.forEach(benefit => allBenefits.add(benefit));
+                if (Array.isArray(service.benefits) && Array.isArray(service.benefitsIcons)) {
+                    service.benefits.forEach((benefit, index) => {
+                        if (!allBenefits.has(benefit)) {
+                            allBenefits.add(benefit);
+                            benefitIcons.set(benefit, service.benefitsIcons[index]);
+                        }
+                    });
                 }
             });
         }
 
-const allButton = document.createElement('button');
+        const allButton = document.createElement('button');
         allButton.classList.add('benefit-btn', 'active');
         allButton.dataset.filter = 'all';
         allButton.innerHTML = `
-            <img src="${BASE_URL}todos.png" alt="Todos">
+            <img src="${BASE_URL}todos.png" alt="Todos" style="width: 24px; height: 24px;">
             <span>Todos</span>
         `;
         benefitsNav.appendChild(allButton);
@@ -376,8 +368,11 @@ const allButton = document.createElement('button');
             const button = document.createElement('button');
             button.classList.add('benefit-btn');
             button.dataset.filter = benefit.toLowerCase().replace(/\s+/g, '-');
+            
+            const iconUrl = benefitIcons.get(benefit) || `${BASE_URL}${benefit.toLowerCase().replace(/\s+/g, '-')}.png`;
+            
             button.innerHTML = `
-                <img src="${BASE_URL}${benefit.toLowerCase().replace(/\s+/g, '-')}.png" alt="${benefit}">
+                <img src="${buildImageUrl(iconUrl)}" alt="${benefit}" style="width: 24px; height: 24px;">
                 <span>${benefit}</span>
             `;
             benefitsNav.appendChild(button);
@@ -403,7 +398,7 @@ const allButton = document.createElement('button');
         allButton.classList.add('package-btn', 'active');
         allButton.dataset.filter = 'all';
         allButton.innerHTML = `
-            <img src="${BASE_URL}todos.png" alt="Todos">
+            <img src="${BASE_URL}todos.png" alt="Todos" style="width: 24px; height: 24px;">
             <span>Todos</span>
         `;
         packageNav.appendChild(allButton);
@@ -413,7 +408,7 @@ const allButton = document.createElement('button');
             button.classList.add('package-btn');
             button.dataset.filter = packageTitle.toLowerCase().replace(/\s+/g, '-');
             button.innerHTML = `
-                <img src="${BASE_URL}${packageTitle.toLowerCase().replace(/\s+/g, '-')}-icon.png" alt="${packageTitle}">
+                <img src="${BASE_URL}${packageTitle.toLowerCase().replace(/\s+/g, '-')}-icon.png" alt="${packageTitle}" style="width: 24px; height: 24px;">
                 <span>${packageTitle}</span>
             `;
             packageNav.appendChild(button);
@@ -597,21 +592,6 @@ const allButton = document.createElement('button');
                     }
                 });
             });
-        });
-    }
-
-    function setupDarkMode() {
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-
-        darkModeToggle.addEventListener('change', () => {
-            if (darkModeToggle.checked) {
-                body.classList.add('dark-mode');
-                body.classList.remove('light-mode');
-            } else {
-                body.classList.add('light-mode');
-                body.classList.remove('dark-mode');
-            }
         });
     }
 
