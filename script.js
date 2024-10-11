@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPopup();
         setupGalleryAnimations();
         setupGalleryModal();
-        setupScrollHandling();
+        Handling();
         setupGallery();
     }
 
@@ -512,3 +512,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="image-description">${image.description}</p>
                 </div>
             `;
+function setupScrollHandling() {
+    const header = document.querySelector('.header-controls');
+    if (!header) {
+        console.error('Header controls not found');
+        return;
+    }
+    let lastScrollTop = 0;
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        if (scrollTop > lastScrollTop) {
+            // Scrolling down
+            header.style.top = '-50px';
+        } else {
+            // Scrolling up
+            header.style.top = '10px';
+        }
+
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }, false);
+}
