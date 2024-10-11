@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         popupBenefitsIcons.innerHTML = '';
         if (Array.isArray(data.benefitsIcons)) {
             data.benefitsIcons.forEach(iconUrl => {
-                const img = document.createElement('img');
+const img = document.createElement('img');
                 img.src = buildImageUrl(iconUrl);
                 img.alt = 'Benefit icon';
                 img.classList.add('popup-benefit-icon');
@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         benefitsNav.appendChild(allButton);
 
         allBenefits.forEach(benefit => {
-            const button = document.
+            const button = document.createElement('button');
             button.classList.add('benefit-btn');
             button.dataset.filter = benefit.toLowerCase().replace(/\s+/g, '-');
             
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { src: 'noche1.JPG', title: 'noche1', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
             { src: 'paq1.JPG', title: 'paq1', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
             { src: 'paq2.JPG', title: 'paq2', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
-            { src: 'paq41.JPG', title: 'paq41', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
+{ src: 'paq41.JPG', title: 'paq41', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
             { src: 'rosa.JPG', title: 'rosa', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
             { src: 'rosal.JPG', title: 'rosal', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
             { src: 'rosao.JPG', title: 'rosao', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index === 0) carouselItem.classList.add('active');
             
             carouselItem.innerHTML = `
-            <img src="${buildImageUrl(image.src)}" class="d-block w-100" alt="${image.title}">
+                <img src="${buildImageUrl(image.src)}" class="d-block w-100" alt="${image.title}">
                 <div class="carousel-caption d-none d-md-block">
                     <h5>${image.title}</h5>
                     <p>${image.description}</p>
